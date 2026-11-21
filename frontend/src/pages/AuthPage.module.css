@@ -1,0 +1,62 @@
+.wrap {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, rgba(13,95,78,0.06) 0%, var(--bg) 50%);
+  padding: 40px 20px;
+}
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 40px 36px;
+  box-shadow: var(--shadow-raised);
+}
+
+/* Brand */
+.brand { margin-bottom: 20px; }
+.logoText { font-family: 'Manrope', sans-serif; font-size: 22px; font-weight: 800; color: var(--primary-dark); }
+.logoDivider { width: 80px; height: 2px; background: #c28916; border-radius: 2px; margin-top: 3px; }
+
+.heading { font-family: 'Manrope', sans-serif; font-size: 24px; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; }
+.sub { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; }
+
+.error {
+  background: #FEF2F2; border: 1px solid #FECACA;
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 14px; color: #991B1B;
+  margin-bottom: 16px;
+}
+
+.form { display: flex; flex-direction: column; gap: 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.label { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+.input {
+  padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 14px; color: var(--text-primary);
+  background: var(--surface-muted);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.input:focus { border-color: var(--primary); background: #fff; }
+.submitBtn {
+  margin-top: 4px;
+  padding: 13px;
+  background: var(--primary); color: #fff;
+  border-radius: var(--radius-md);
+  font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: opacity 0.15s;
+}
+.submitBtn:hover:not(:disabled) { opacity: 0.88; }
+.submitBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.switch { margin-top: 20px; text-align: center; font-size: 14px; color: var(--text-secondary); }
+.switchLink { color: var(--primary); font-weight: 600; }
+.switchLink:hover { text-decoration: underline; }
+

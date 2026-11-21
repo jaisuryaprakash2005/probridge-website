@@ -1,0 +1,4 @@
+.otp_store.json
+firebase-service-account.json
+*firebase-adminsdk*.json
+

@@ -1,0 +1,275 @@
+/* ─── Top Banner Container directly above search bar ─────────── */
+.bannerWrap {
+  width: 100%;
+  max-width: 920px;
+  margin: 6px auto 14px;
+  position: relative;
+  z-index: 2;
+}
+
+.bannerCard {
+  position: relative;
+  width: 100%;
+  height: 120px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(13, 95, 78, 0.12), 0 2px 6px rgba(0, 0, 0, 0.05);
+  border: 1.5px solid rgba(13, 95, 78, 0.18);
+  background: #0B1915;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.bannerCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 34px rgba(13, 95, 78, 0.22), 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #10B981;
+}
+
+/* ─── Image Slide (Appear & Disappear Crossfade Style) ────────── */
+.slideLayer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.85s cubic-bezier(0.4, 0, 0.2, 1), transform 0.85s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.85s ease;
+  transform: scale(1.02);
+  pointer-events: none;
+}
+
+.slideActive {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+.bannerImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* Subtle dark gradient overlay for text readability */
+.gradientOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(11, 25, 21, 0.78) 0%,
+    rgba(11, 25, 21, 0.45) 45%,
+    rgba(11, 25, 21, 0.15) 100%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 14px 24px;
+}
+
+/* ─── Banner Content Info ─────────────────────────────────────── */
+.badgeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.sponsoredBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #0D5F4E;
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  padding: 2.5px 8px;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.featuredBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  color: #FEF08A;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid rgba(254, 240, 138, 0.3);
+}
+
+.bannerTitle {
+  font-family: 'Manrope', sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin: 0 0 2px;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 680px;
+}
+
+.bannerSub {
+  font-size: 12px;
+  color: #E2E8F0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.bannerSub strong {
+  color: #34D399;
+  font-weight: 700;
+}
+
+.viewDetailsPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 10px;
+  padding: 3px 10px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #0D5F4E;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  transition: all 0.18s ease;
+}
+
+.bannerCard:hover .viewDetailsPill {
+  background: #10B981;
+  color: #FFFFFF;
+  transform: translateX(2px);
+}
+
+/* ─── Controls: Arrows & Indicators ──────────────────────────── */
+.navArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(6px);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.bannerCard:hover .navArrow {
+  opacity: 1;
+}
+
+.navArrow:hover {
+  background: rgba(13, 95, 78, 0.95);
+  border-color: #34D399;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.arrowLeft { left: 10px; }
+.arrowRight { right: 10px; }
+
+/* ─── Dots / Pagination Indicator ────────────────────────────── */
+.dotsWrap {
+  position: absolute;
+  bottom: 8px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 5;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.dotActive {
+  width: 18px;
+  border-radius: 999px;
+  background: #34D399;
+}
+
+/* ─── Bottom Timing Bar ──────────────────────────────────────── */
+.timerBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #10B981 0%, #34D399 100%);
+  transition: width 0.1s linear;
+  z-index: 6;
+}
+
+/* ─── Responsive adjustments ─────────────────────────────────── */
+@media (max-width: 768px) {
+  .bannerCard {
+    height: 100px;
+    border-radius: 12px;
+  }
+  .gradientOverlay {
+    padding: 10px 14px;
+  }
+  .bannerTitle {
+    font-size: 14px;
+    max-width: 90%;
+  }
+  .bannerSub {
+    font-size: 11px;
+  }
+  .navArrow {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .bannerCard {
+    height: 84px;
+  }
+  .bannerTitle {
+    font-size: 13px;
+  }
+  .badgeRow {
+    gap: 4px;
+    margin-bottom: 2px;
+  }
+  .sponsoredBadge, .featuredBadge {
+    font-size: 9px;
+    padding: 1.5px 5px;
+  }
+  .viewDetailsPill {
+    display: none;
+  }
+}

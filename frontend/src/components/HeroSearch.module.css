@@ -1,0 +1,617 @@
+/* ─── Hero Section with Dynamic Ratio Banner (PropTiger Exact Style) ───── */
+.heroSection {
+  position: relative;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+/* ── Banner Container (Dynamically Set to Admin Uploaded Ratio, NO Zooming) ── */
+.bannerContainer {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--banner-aspect-ratio, 2.79 / 1);
+  min-height: 280px;
+  overflow: hidden;
+  background: #081410;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  transition: aspect-ratio 0.4s ease;
+}
+
+/* ── Full-Width Background Slides (Smooth Crossfade, NO Zooming) ── */
+.bgSlide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 1.2s ease-in-out;
+  transform: none !important;
+}
+
+.bgSlideActive {
+  opacity: 1;
+  visibility: visible;
+  transform: none !important;
+}
+
+.bannerImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transform: none !important;
+  transition: none !important;
+}
+
+.bgSlide:hover .bannerImg {
+  transform: none !important;
+}
+
+/* Bottom gradient wash so the bold white title is 100% legible */
+.bannerOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(8, 20, 16, 0.15) 0%,
+    rgba(8, 20, 16, 0.35) 50%,
+    rgba(8, 20, 16, 0.82) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Title Wrapper: Centered Directly Over Banner Graphic ────────────────── */
+.titleWrap {
+  position: relative;
+  z-index: 2;
+  padding-bottom: 56px;
+  text-align: center;
+  width: 100%;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.heroHeading {
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: clamp(24px, 3.8vw, 42px);
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  margin: 0;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.8);
+  text-align: center;
+}
+
+/* ── Search Card Wrapper (Overlapping Bottom Edge of Banner) ─────────────── */
+.searchCardWrapper {
+  position: relative;
+  z-index: 4;
+  max-width: 880px;
+  width: calc(100% - 32px);
+  margin: -44px auto 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ── Search Card (White Floating Card with Soft Elevation) ────────────────── */
+.searchCard {
+  width: 100%;
+  background: #FFFFFF;
+  border-radius: 18px;
+  box-shadow: 0 14px 44px rgba(10, 25, 40, 0.16);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid #E2E8F0;
+}
+
+/* ── Search Top Row ─────────────────────────────────────────── */
+.searchTopRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+/* City Picker */
+.cityPicker {
+  position: relative;
+}
+
+.cityPickerBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0F172A;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.cityPickerBtn:hover {
+  background: #F1F5F9;
+  border-color: #CBD5E1;
+}
+
+.cityPinIcon {
+  color: #0D5F4E;
+}
+
+.chevronIcon {
+  color: #64748B;
+}
+
+/* City Dropdown Menu */
+.cityDropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 220px;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.18);
+  z-index: 600;
+  padding: 8px;
+  animation: dropIn 0.15s ease;
+}
+
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.dropdownHeader {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748B;
+  padding: 6px 8px 4px;
+  letter-spacing: 0.5px;
+}
+
+.citySearchInput {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 13px;
+  border: 1px solid #E2E8F0;
+  border-radius: 6px;
+  outline: none;
+  margin-bottom: 6px;
+}
+
+.dropList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.dropOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0F172A;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.dropOption:hover {
+  background: #F1F5F9;
+  color: #0D5F4E;
+}
+
+.dropOptionActive {
+  background: #E8F5F0;
+  color: #0D5F4E;
+}
+
+.checkIcon {
+  margin-left: auto;
+  color: #0D5F4E;
+}
+
+.verticalDivider {
+  width: 1px;
+  height: 28px;
+  background: #E2E8F0;
+  flex-shrink: 0;
+}
+
+/* Main Search Input */
+.searchFieldWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  padding: 0 12px;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.searchFieldWrap:focus-within {
+  border-color: #0D5F4E;
+  background: #FFFFFF;
+}
+
+.searchIcon {
+  color: #64748B;
+  flex-shrink: 0;
+  margin-right: 6px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 4px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0F172A;
+}
+
+.searchInput::placeholder {
+  color: #94A3B8;
+  font-weight: 400;
+}
+
+.clearBtn {
+  background: none;
+  border: none;
+  color: #94A3B8;
+  cursor: pointer;
+  padding: 4px;
+  display: grid;
+  place-items: center;
+}
+
+/* Locality Autocomplete Dropdown based on City */
+.locDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+  z-index: 600;
+  padding: 10px 12px;
+  animation: dropIn 0.15s ease;
+  max-height: 380px;
+  display: flex;
+  flex-direction: column;
+}
+
+.locDropHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px 8px;
+  border-bottom: 1px solid #E2E8F0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.locQuickPills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 2px 10px;
+  border-bottom: 1px solid #E2E8F0;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.locQuickChip {
+  padding: 4px 10px;
+  background: #E8F5F0;
+  border: 1px solid #C4E5D8;
+  color: #0D5F4E;
+  border-radius: 16px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.locQuickChip:hover {
+  background: #0D5F4E;
+  color: #FFFFFF;
+}
+
+.locList {
+  list-style: none;
+  margin: 0;
+  padding: 6px 0 0;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.locItemText {
+  flex: 1;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0F172A;
+}
+
+.locCityTag {
+  font-size: 11px;
+  color: #64748B;
+  background: #F1F5F9;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.dropEmpty {
+  padding: 16px;
+  font-size: 13px;
+  color: #64748B;
+  text-align: center;
+}
+
+/* Navy Blue Search Button (PropTiger Style) */
+.searchSubmitBtn {
+  background: #0A2240;    /* Navy Blue */
+  color: #FFFFFF;
+  padding: 12px 28px;
+  border-radius: 26px;
+  border: none;
+  font-size: 14.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.15s;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(10, 34, 64, 0.25);
+}
+
+.searchSubmitBtn:hover {
+  background: #0D5F4E;
+  transform: translateY(-1px);
+}
+
+/* ── Filter Pills Row (Budget, Property Type, Project Status) ─────────────── */
+.filterPillsRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 2px;
+}
+
+.pillContainer {
+  position: relative;
+}
+
+.filterPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.filterPill:hover {
+  border-color: #0D5F4E;
+  color: #0D5F4E;
+  background: #F8FAFC;
+}
+
+.filterPillActive {
+  border-color: #0D5F4E;
+  background: #E8F5F0;
+  color: #0D5F4E;
+  font-weight: 700;
+}
+
+.pillIcon {
+  color: #64748B;
+}
+
+.filterPillActive .pillIcon {
+  color: #0D5F4E;
+}
+
+.pillChevron {
+  color: #64748B;
+  transition: transform 0.15s;
+}
+
+/* Popover Menu for Filters */
+.popoverMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 200px;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16);
+  z-index: 600;
+  padding: 6px;
+  animation: dropIn 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.popoverHeader {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748B;
+  padding: 6px 10px 4px;
+  letter-spacing: 0.5px;
+}
+
+.popoverItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #0F172A;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+}
+
+.popoverItem:hover {
+  background: #F1F5F9;
+  color: #0D5F4E;
+}
+
+.popoverItemActive {
+  background: #E8F5F0;
+  color: #0D5F4E;
+  font-weight: 700;
+}
+
+.resetFilterBtn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: #DC2626;
+  cursor: pointer;
+  padding: 4px 8px;
+  text-decoration: underline;
+  margin-left: auto;
+}
+
+/* ── Trending Localities Pills Under Search Card ─────────────────────────── */
+.quickLocRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+  max-width: 880px;
+}
+
+.quickLocLabel {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.quickLocChip {
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid #E2E8F0;
+  background: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.quickLocChip:hover {
+  border-color: #0D5F4E;
+  color: #0D5F4E;
+  background: #E8F5F0;
+}
+
+/* ─── Responsive Media Queries ────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .bannerContainer {
+    aspect-ratio: auto;
+    min-height: 260px;
+  }
+  .titleWrap {
+    padding-bottom: 40px;
+  }
+  .searchCardWrapper {
+    margin-top: -30px;
+  }
+  .searchTopRow {
+    flex-wrap: wrap;
+  }
+  .cityPicker {
+    width: 100%;
+  }
+  .cityPickerBtn {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .verticalDivider {
+    display: none;
+  }
+  .searchFieldWrap {
+    width: 100%;
+  }
+  .searchSubmitBtn {
+    width: 100%;
+  }
+  .filterPillsRow {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .heroHeading {
+    font-size: 22px;
+  }
+  .searchCardWrapper {
+    width: calc(100% - 20px);
+  }
+  .searchCard {
+    padding: 12px;
+  }
+}
+
+/* -- Extra small screen fixes ------------------------------------- */
+@media (max-width: 360px) {
+  .searchCardWrapper { width: calc(100% - 16px); }
+  .searchCard        { padding: 10px; }
+  .cityPickerBtn     { font-size: 12px; padding: 8px 10px; }
+  .searchSubmitBtn   { font-size: 13px; }
+  .heroHeading       { font-size: 18px; }
+}

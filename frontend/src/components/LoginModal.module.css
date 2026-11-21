@@ -1,0 +1,404 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.22s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal {
+  position: relative;
+  background: #ffffff;
+  width: 100%;
+  max-width: 440px;
+  border-radius: 20px;
+  padding: 32px 28px 28px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  animation: scaleUp 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.closeBtn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: #F1F5F9;
+  color: #64748B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.closeBtn:hover {
+  background: #E2E8F0;
+  color: #0F172A;
+}
+
+.brandWrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.brandWrap :global(.brandRow),
+.brandWrap :global(.letterPart),
+.brandWrap :global(.oText),
+.brandWrap :global(.tagline) {
+  color: #134E3A !important; /* ProBridge Forest Green */
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0 0 6px;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 13.5px;
+  color: #64748B;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.phoneHighlight {
+  font-weight: 600;
+  color: #0F172A;
+}
+
+.editPhoneBtn {
+  display: inline-block;
+  margin-left: 8px;
+  background: none;
+  border: none;
+  color: #0284C7;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.errorBanner {
+  background: #FEF2F2;
+  border: 1px solid #FCA5A5;
+  color: #DC2626;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.devOtpHint {
+  background: #F0FDF4;
+  border: 1px solid #86EFAC;
+  color: #166534;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.devOtpBadge {
+  background: #DCFCE7;
+  color: #15803D;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.inputWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.fieldIcon {
+  position: absolute;
+  left: 14px;
+  color: #94A3B8;
+  pointer-events: none;
+}
+
+.input {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px 0 42px;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 12px;
+  font-size: 14.5px;
+  color: #0F172A;
+  background: #F8FAFC;
+  outline: none;
+  transition: all 0.18s ease;
+  font-family: inherit;
+}
+
+.input:focus {
+  background: #ffffff;
+  border-color: #0284C7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.phoneInputWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #F8FAFC;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 12px;
+  transition: all 0.18s ease;
+}
+
+.phoneInputWrap:focus-within {
+  background: #ffffff;
+  border-color: #0284C7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.countryCode {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 12px 0 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  border-right: 1.5px solid #E2E8F0;
+  height: 46px;
+  user-select: none;
+}
+
+.phoneInput {
+  flex: 1;
+  height: 46px;
+  border: none;
+  background: transparent;
+  padding: 0 14px;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: #0F172A;
+  outline: none;
+  font-family: inherit;
+}
+
+.otpInputWrap {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.otpDigit {
+  width: 48px;
+  height: 54px;
+  border-radius: 12px;
+  border: 2px solid #E2E8F0;
+  background: #F8FAFC;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  color: #0F172A;
+  outline: none;
+  transition: all 0.18s ease;
+}
+
+.otpDigit:focus {
+  background: #ffffff;
+  border-color: #0284C7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.otpDigitFilled {
+  border-color: #0284C7;
+  background: #F0F9FF;
+}
+
+.submitBtn {
+  width: 100%;
+  height: 48px;
+  margin-top: 8px;
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1E293B 0%, #334155 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
+}
+
+.submitBtn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.resendRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #64748B;
+  margin-top: 8px;
+}
+
+.resendBtn {
+  background: none;
+  border: none;
+  color: #0284C7;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.resendBtn:hover {
+  text-decoration: underline;
+}
+
+.resendTimer {
+  font-weight: 600;
+  color: #0F172A;
+}
+
+.termsText {
+  text-align: center;
+  font-size: 11.5px;
+  color: #94A3B8;
+  margin-top: 20px;
+  line-height: 1.5;
+}
+
+/* -- Step Indicator ------------------------------------- */
+.stepIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin: 0 0 20px;
+}
+.stepDot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+.stepActive {
+  background: #2563eb;
+  color: #fff;
+}
+.stepLine {
+  width: 48px;
+  height: 2px;
+  background: #e2e8f0;
+}
+
+/* -- OTP subtitle --------------------------------------- */
+.otpSubtitle {
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
+  margin: -8px 0 16px;
+}
+
+/* -- Firebase badge ------------------------------------- */
+.firebaseBadge {
+  font-size: 11px;
+  font-weight: 600;
+  background: #fff7ed;
+  color: #ea580c;
+  border: 1px solid #fed7aa;
+  border-radius: 4px;
+  padding: 1px 6px;
+  margin-left: 4px;
+}
+
+/* -- Loading spinner ------------------------------------ */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

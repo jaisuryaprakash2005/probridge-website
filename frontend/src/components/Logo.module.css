@@ -1,0 +1,114 @@
+.logoWrap {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-decoration: none;
+  user-select: none;
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* Brand Row: PROBRIDGE */
+.brandRow {
+  display: flex;
+  align-items: baseline;
+  font-family: 'Montserrat', 'Outfit', 'Manrope', -apple-system, sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #FFFFFF;
+}
+
+.letterPart {
+  display: inline-block;
+}
+
+/* The 'O' with golden bridge */
+.letterO {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.oText {
+  display: inline-block;
+}
+
+.goldenArc {
+  position: absolute;
+  top: 18%;
+  left: -12%;
+  width: 124%;
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+}
+
+/* Golden Divider Line */
+.goldLine {
+  width: 100%;
+  background: linear-gradient(90deg, #D49520 0%, #F5BE47 50%, #D49520 100%);
+  border-radius: 1px;
+}
+
+/* Tagline: We Connect World of Real Estate */
+.tagline {
+  font-family: 'Montserrat', 'Inter', -apple-system, sans-serif;
+  font-style: italic;
+  font-weight: 600;
+  color: #9FB5AA;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+/* ─── Size Variations ─────────────────────────────────────────── */
+
+/* Theme Variations */
+.theme_forest .brandRow,
+.theme_green .brandRow {
+  color: #134E3A !important;
+}
+
+.theme_forest .tagline,
+.theme_green .tagline {
+  color: #134E3A !important;
+}
+
+/* Medium (Navbar Default) */
+.size_md .brandRow {
+  font-size: 20px;
+}
+.size_md .goldLine {
+  height: 2px;
+  margin: 3px 0 3px;
+}
+.size_md .tagline {
+  font-size: 9px;
+  letter-spacing: 0.03em;
+}
+
+/* Small (Mobile / Compact) */
+.size_sm .brandRow {
+  font-size: 16px;
+}
+.size_sm .goldLine {
+  height: 1.5px;
+  margin: 2px 0 2px;
+}
+.size_sm .tagline {
+  font-size: 7.5px;
+}
+
+/* Large (Footer / Hero) */
+.size_lg .brandRow {
+  font-size: 24px;
+}
+.size_lg .goldLine {
+  height: 2px;
+  margin: 4px 0 4px;
+}
+.size_lg .tagline {
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+}
+

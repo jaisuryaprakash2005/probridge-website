@@ -1,0 +1,23 @@
+.wrap {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 40px clamp(20px, 3vw, 40px) 60px;
+  width: 100%;
+}
+.heading { font-family: 'Manrope', sans-serif; font-size: 28px; font-weight: 800; color: var(--text-primary); margin-bottom: 28px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+.loading { text-align: center; padding: 60px; color: var(--text-secondary); }
+.empty { text-align: center; padding: 60px 20px; }
+.emptyTitle { font-family: 'Manrope', sans-serif; font-size: 20px; font-weight: 700; color: var(--text-primary); margin-top: 12px; }
+.emptySub { font-size: 15px; color: var(--text-secondary); margin-top: 6px; }
+.browseBtn {
+  margin-top: 20px;
+  display: inline-block;
+  padding: 12px 28px;
+  background: var(--primary); color: #fff;
+  border-radius: var(--radius-pill);
+  font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: opacity 0.15s;
+}
+.browseBtn:hover { opacity: 0.88; }
+

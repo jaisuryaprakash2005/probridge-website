@@ -1,0 +1,80 @@
+/* ─── Design Tokens — Forest Green & Light Yellow Theme ─────────── */
+:root {
+  /* Warm light yellow canvas */
+  --bg:            #FAF8EC;       /* Elegant warm light yellow */
+  --bg-subtle:     #FFFDF2;       /* Ultra-soft light cream */
+  --surface:       #FFFFFF;       /* Crisp white for elevated cards */
+  --surface-muted: #F3EED8;       /* Subtle warm yellow-cream for inputs & chips */
+  --border:        #E8E2CC;       /* Soft warm divider */
+  --border-strong: #D6CEB0;       /* Focused / active border */
+
+  /* Signature Forest Green brand */
+  --brand:         #134E3A;       /* Deep rich forest green */
+  --brand-dark:    #0B3426;       /* Ultra-deep forest slate */
+  --brand-light:   #E4F2EC;       /* Soft mint forest tint */
+
+  --primary:       #134E3A;       /* Forest Green */
+  --primary-dark:  #0B3426;       /* Midnight Forest */
+  --primary-light: #E4F2EC;       /* Forest mist */
+  --primary-glow:  rgba(19, 78, 58, 0.16);
+
+  /* Gold / Warm Yellow Accents */
+  --yellow-accent: #FDE047;       /* Bright warm yellow */
+  --yellow-soft:   #FEF9C3;       /* Pastel light yellow */
+  --yellow-text:   #854D0E;       /* Deep warm amber */
+  --gold:          #C28916;       /* Warm architectural gold */
+
+  /* Typography */
+  --text-primary:   #0F241D;      /* Deep forest-charcoal (high contrast readability) */
+  --text-secondary: #3B5249;      /* Balanced secondary forest slate */
+  --text-muted:     #6D857C;      /* Soft captions & placeholders */
+  --text-on-primary:#FFFFFF;
+
+  /* Accents */
+  --sage:      #D1FAE5;
+  --sage-text: #065F46;
+  --amber:     #FEF3C7;
+  --amber-text:#92400E;
+  --danger:    #EF4444;
+  --success:   #10B981;
+  --accent:    #134E3A;
+
+  /* Radius */
+  --radius-sm:  8px;
+  --radius-md:  14px;
+  --radius-lg:  18px;
+  --radius-xl:  24px;
+  --radius-pill:9999px;
+
+  /* Shadows with warm forest undertones */
+  --shadow-soft: 0 2px 8px rgba(15, 36, 29, 0.05);
+  --shadow-card: 0 4px 16px rgba(15, 36, 29, 0.07);
+  --shadow-raised: 0 10px 28px rgba(15, 36, 29, 0.12);
+}
+
+/* ─── Reset ─────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; overflow-x: clip; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.5;
+  overflow-x: clip;
+  -webkit-overflow-scrolling: touch;
+  -webkit-font-smoothing: antialiased;
+}
+img { display: block; max-width: 100%; }
+a  { text-decoration: none; color: inherit; }
+button { cursor: pointer; border: none; background: none; font: inherit; }
+input, select, textarea { font: inherit; }
+ul, ol { list-style: none; }
+
+/* ─── Utilities ─────────────────────────────────────────────────────────── */
+.container {
+  width: 100%;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 3vw, 40px);
+}
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }

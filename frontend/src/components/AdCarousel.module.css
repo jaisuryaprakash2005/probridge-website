@@ -1,0 +1,528 @@
+/* ══════════════════════════════════════════════════════════════
+   AdCarousel.module.css — ProBridge Compact Luxury Ad Redesign
+══════════════════════════════════════════════════════════════ */
+
+/* ─── Carousel Outer ──────────────────────────────────────── */
+.carouselContainer {
+  position: relative;
+  width: 100%;
+}
+
+/* ─── Viewport — Compact & Highly Styled ──────────────────── */
+.sliderViewport {
+  position: relative;
+  width: 100%;
+  height: 350px;
+  min-height: 350px;
+  max-height: 360px;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #FFFFFF;
+  border: 1px solid rgba(19, 78, 58, 0.12);
+  box-shadow:
+    0 14px 36px rgba(19, 78, 58, 0.09),
+    0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.sliderViewport:hover {
+  border-color: rgba(19, 78, 58, 0.25);
+  box-shadow:
+    0 18px 44px rgba(19, 78, 58, 0.13),
+    0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* ─── Sliding Track ───────────────────────────────────────── */
+.sliderTrack {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+/* ─── Single Slide ────────────────────────────────────────── */
+.slideCard {
+  position: relative;
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  user-select: none;
+  background: #FFFFFF;
+}
+
+/* ─── Image Column (Compact 38%) ──────────────────────────── */
+.imageCol {
+  position: relative;
+  flex: 0 0 38%;
+  height: 100%;
+  min-height: 350px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #0F172A;
+}
+
+.bannerImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transform: scale(1.01);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+.imageCol:hover .bannerImg {
+  transform: scale(1.05) !important;
+}
+
+.imageOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    170deg,
+    rgba(10, 36, 25, 0.45) 0%,
+    transparent 35%,
+    transparent 55%,
+    rgba(10, 36, 25, 0.90) 100%
+  );
+  pointer-events: none;
+}
+
+/* Badges on image */
+.sponsoredBadge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 13px;
+  background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%);
+  color: #FFFFFF;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.9px;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  z-index: 2;
+}
+.sparkleIcon { color: #FEF08A; }
+
+.counterBadge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: rgba(10, 36, 25, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  z-index: 2;
+}
+
+/* Compact Luxury Price Tag on Image */
+.imagePriceTag {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  background: rgba(10, 36, 25, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 7px 15px;
+  border-radius: 14px;
+  border: 1px solid rgba(253, 224, 71, 0.45);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  z-index: 2;
+}
+.imagePriceVal {
+  font-family: 'Manrope', 'Inter', sans-serif;
+  font-size: 21px;
+  font-weight: 900;
+  color: #FDE047;
+  letter-spacing: -0.4px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  line-height: 1.1;
+}
+.imagePriceSub {
+  font-size: 10px;
+  font-weight: 700;
+  color: #F1F5F9;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+/* ─── Details Column (Compact & Sleek) ────────────────────── */
+.detailsCol {
+  flex: 1;
+  min-width: 0;
+  padding: 20px 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+  background: #FFFFFF;
+  position: relative;
+}
+
+/* Gradient accent bar on left edge */
+.detailsCol::before {
+  content: '';
+  position: absolute;
+  top: 15%;
+  bottom: 15%;
+  left: 0;
+  width: 3.5px;
+  background: linear-gradient(180deg, #134E3A 0%, #D97706 100%);
+  border-radius: 999px;
+}
+
+/* Eyebrow Row */
+.eyebrowRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.exclusivePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  color: var(--brand, #134E3A);
+  background: rgba(19, 78, 58, 0.08);
+  border: 1px solid rgba(19, 78, 58, 0.16);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+.shieldIcon { color: var(--brand, #134E3A); }
+
+.possessionBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #15803D;
+  background: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+/* Title & Location */
+.adTitle {
+  font-family: 'Manrope', 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: #0F241D;
+  line-height: 1.25;
+  letter-spacing: -0.4px;
+  margin: 0;
+  cursor: pointer;
+  transition: color 0.18s;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.adTitle:hover {
+  color: var(--brand, #134E3A);
+}
+
+.locationRow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #64748B;
+  font-size: 12.5px;
+  font-weight: 600;
+  margin-top: -2px;
+}
+.pinIcon { color: var(--brand, #134E3A); flex-shrink: 0; }
+
+/* Specs Grid (Compact 4-column inline micro-cards) */
+.specsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 2px 0;
+}
+.specBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: #FBF9F4;
+  border: 1px solid #EDE6D6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: all 0.18s ease;
+  min-width: 0;
+}
+.specBox:hover {
+  background: #F5EFE1;
+  border-color: #DCD3BF;
+  transform: translateY(-1px);
+}
+.specIcon {
+  color: var(--brand, #134E3A);
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+}
+.specLabel {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted, #6D857C);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.specVal {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-primary, #0F241D);
+  margin-top: 1px;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Description (2 lines clamp) */
+.descriptionText {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #4B5563;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Amenities Chips */
+.amenitiesRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 26px;
+  overflow: hidden;
+}
+.amenityChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: #E8F5F0;
+  border: 1px solid rgba(19, 78, 58, 0.15);
+  color: var(--brand, #134E3A);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1px;
+  white-space: nowrap;
+}
+.checkIcon { color: #16A34A; }
+
+/* Bottom Action Row */
+.actionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #ECE7D8;
+  margin-top: auto;
+  flex-wrap: wrap;
+}
+
+.bottomPriceBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.priceHeading {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--text-muted, #6D857C);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.priceValueWrap {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.bottomPriceVal {
+  font-family: 'Manrope', 'Inter', sans-serif;
+  font-size: 23px;
+  font-weight: 900;
+  color: var(--brand, #134E3A);
+  letter-spacing: -0.6px;
+  line-height: 1.1;
+}
+.bottomPriceNote {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted, #6D857C);
+}
+
+.buttonGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.enquireBtn {
+  padding: 8px 16px;
+  background: #FFFFFF;
+  color: var(--brand, #134E3A);
+  border: 1.5px solid var(--brand, #134E3A);
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: 0 1px 4px rgba(19, 78, 58, 0.08);
+}
+.enquireBtn:hover {
+  background: #F0FDF4;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(19, 78, 58, 0.15);
+}
+
+.viewDetailsBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: linear-gradient(135deg, #134E3A 0%, #1a6b4f 100%);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(19, 78, 58, 0.3);
+  transition: all 0.18s ease;
+}
+.viewDetailsBtn:hover {
+  background: linear-gradient(135deg, #0f3d2e 0%, #134E3A 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(19, 78, 58, 0.4);
+}
+
+/* ─── Nav Arrows — Sleek Floating Glass ───────────────────── */
+.navArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(19, 78, 58, 0.15);
+  color: #134E3A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  opacity: 0.85;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  transition: opacity 0.2s, background 0.2s, transform 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.carouselContainer:hover .navArrow { opacity: 1; }
+.navArrowPrev { left: 12px; }
+.navArrowNext { right: 12px; }
+.navArrow:hover {
+  background: var(--brand, #134E3A);
+  color: #FFFFFF;
+  border-color: #134E3A;
+  transform: translateY(-50%) scale(1.08);
+  box-shadow: 0 6px 18px rgba(19, 78, 58, 0.35);
+}
+
+/* ─── Dot Indicators ──────────────────────────────────────── */
+.dotsRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(19, 78, 58, 0.2);
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
+}
+.dot:hover { background: rgba(19, 78, 58, 0.5); }
+.dotActive {
+  width: 24px;
+  background: linear-gradient(90deg, #134E3A 0%, #207e5f 100%);
+  border-radius: 999px;
+}
+
+/* ─── Responsive ──────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .sliderViewport {
+    height: auto;
+    min-height: unset;
+    max-height: unset;
+  }
+  .slideCard { flex-direction: column; }
+  .imageCol {
+    flex: none;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    min-height: 240px;
+    height: auto;
+  }
+  .detailsCol {
+    padding: 22px 20px;
+    gap: 12px;
+  }
+  .detailsCol::before { display: none; }
+  .adTitle { font-size: 19px; -webkit-line-clamp: 2; }
+  .specsGrid { grid-template-columns: repeat(2, 1fr); }
+  .navArrow { width: 36px; height: 36px; }
+}
+
+@media (max-width: 640px) {
+  .specsGrid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .actionRow { flex-direction: column; align-items: stretch; gap: 8px; }
+  .buttonGroup { width: 100%; display: flex; gap: 8px; }
+  .enquireBtn, .viewDetailsBtn { flex: 1; justify-content: center; text-align: center; }
+  .navArrow { display: none; }
+  .imagePriceVal { font-size: 18px; }
+  .bottomPriceVal { font-size: 20px; }
+}

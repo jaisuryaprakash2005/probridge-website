@@ -1,0 +1,174 @@
+.footer {
+  width: 100%;
+  background: #0d2238; /* Deep rich navy blue matching PropTiger */
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 60px;
+  color: #FFFFFF;
+}
+
+.inner {
+  display: grid;
+  grid-template-columns: 2.2fr 1fr 1fr;
+  gap: 56px;
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 56px clamp(16px, 3vw, 44px) 44px;
+  box-sizing: border-box;
+}
+
+/* Brand & Corporate Bio */
+.brandCol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.footerLogoLink {
+  display: inline-block;
+  background: transparent;
+  padding: 0;
+  border-radius: 6px;
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.footerLogoLink:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.aboutText {
+  font-size: 13.5px;
+  line-height: 1.68;
+  color: rgba(255, 255, 255, 0.72);
+  margin: 18px 0 22px;
+  max-width: 620px;
+}
+
+/* Contact Details with Gold Accent Icons */
+.contactList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.contactRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.5;
+}
+
+.contactIcon {
+  color: #F59E0B; /* Warm gold icon accent */
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.contactLink {
+  color: rgba(255, 255, 255, 0.88);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.contactLink:hover {
+  color: #FDE047;
+  text-decoration: underline;
+}
+
+/* Nav Columns (Company & Resources) */
+.navCol {
+  display: flex;
+  flex-direction: column;
+}
+
+.colTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0 0 18px;
+  letter-spacing: -0.2px;
+}
+
+.linkList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.link {
+  font-size: 14px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  transition: color 0.15s, transform 0.15s;
+  display: inline-block;
+}
+
+.link:hover {
+  color: #FDE047;
+  transform: translateX(2px);
+}
+
+/* Bottom bar */
+.bottomBar {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.bottomInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 18px clamp(16px, 3vw, 44px);
+  box-sizing: border-box;
+  gap: 16px;
+}
+
+.copy {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.social {
+  display: flex;
+  gap: 8px;
+}
+
+.socialBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.85);
+  transition: all 0.15s;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.socialBtn:hover {
+  color: #0d2238;
+  background: #FDE047;
+  border-color: #FDE047;
+}
+
+@media (max-width: 900px) {
+  .inner {
+    grid-template-columns: 1fr;
+    gap: 36px;
+    padding: 40px 20px 28px;
+  }
+  .bottomInner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
