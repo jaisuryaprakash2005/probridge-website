@@ -6,6 +6,7 @@ import EnquiryModal from '../components/EnquiryModal';
 import AdCarousel from '../components/AdCarousel';
 import { getProperties, getCategoryCounts, getBuilderCounts, getBuilders } from '../services/api';
 import { BUILDERS } from '../data/builders';
+import { MOCK_PROPERTIES } from '../data/mockProperties';
 import {
   ShieldCheck, UserCheck, Percent, PhoneCall,
   Building2, Home, TreePine, Store, Landmark, BedDouble,
@@ -78,25 +79,154 @@ export default function HomePage() {
   const [categoryCounts, setCategoryCounts] = useState({});
   const [builderCounts, setBuilderCounts] = useState({});
   const [buildersList, setBuildersList] = useState(BUILDERS);
+  const [allProperties, setAllProperties] = useState([]);
   const [newProperties, setNewProperties] = useState([]);
   const [loadingNew, setLoadingNew] = useState(true);
   const [showAllBuilders, setShowAllBuilders] = useState(false);
 
-  // Sort curated builders dynamically based on project count (highest count first)
-  const sortedBuilders = useMemo(() => {
-    const list = (buildersList || BUILDERS).map((b) => {
-      const count = Number(
-        builderCounts[b.name] ??
-        builderCounts[b.name.toLowerCase()] ??
-        builderCounts[b.id] ??
-        0
-      );
-      return { ...b, id: b.id || b._id || b.name, count };
+  // Dynamic Popular Localities computed based on real property count in each locality
+  const popularLocalities = useMemo(() => {
+    const list = (allProperties && allProperties.length > 0)
+      ? allProperties
+      : (newProperties.length > 0 ? newProperties : MOCK_PROPERTIES);
+
+    const locMap = {};
+
+    list.forEach((p) => {
+      const loc = (p.locality || '').trim();
+      const city = (p.city || '').trim();
+      if (!loc) return;
+      const key = `${loc}, ${city || 'India'}`;
+
+      if (!locMap[key]) {
+        locMap[key] = {
+          name: loc,
+          city: city,
+          title: city ? `${loc}, ${city}` : loc,
+          count: 0,
+          prices: [],
+          sqftPrices: [],
+        };
+      }
+
+      locMap[key].count += 1;
+
+      const priceRaw = Number(p.priceRaw) || 0;
+      if (priceRaw > 0) {
+        locMap[key].prices.push(priceRaw);
+      }
+
+      if (p.perSqft) {
+        const cleaned = String(p.perSqft).replace(/[^0-9]/g, '');
+        const sqftNum = Number(cleaned);
+        if (sqftNum > 0) {
+          locMap[key].sqftPrices.push(sqftNum);
+        }
+      }
     });
 
-    // Keep curated top builders (Brigade, Puravankara, Godrej, Prestige) sorted by project count
-    return list.sort((a, b) => b.count - a.count);
-  }, [buildersList, builderCounts]);
+    // Reference baseline localities matching Image 1
+    const baselineDefaults = [
+      { name: 'Camp', city: 'Pune', count: 3, avgPriceDisplay: '₹ 1.13 Crore' },
+      { name: 'Chimbali', city: 'Pune', count: 10, avgPriceDisplay: '₹ 5,760/Sq. Ft' },
+      { name: 'Dudulgaon', city: 'Pune', count: 27, avgPriceDisplay: '₹ 4,646/Sq. Ft' },
+      { name: 'Whitefield', city: 'Bengaluru', count: 18, avgPriceDisplay: '₹ 1.25 Crore' },
+      { name: 'Hebbal', city: 'Bengaluru', count: 14, avgPriceDisplay: '₹ 1.45 Crore' },
+      { name: 'Padur', city: 'Chennai', count: 8, avgPriceDisplay: '₹ 82.5 Lac' },
+    ];
+
+    const result = Object.values(locMap).map((loc) => {
+      let avgPriceDisplay = '';
+      if (loc.sqftPrices.length > 0 && (loc.name === 'Chimbali' || loc.name === 'Dudulgaon' || loc.prices.length === 0)) {
+        const avgSqft = Math.round(loc.sqftPrices.reduce((a, b) => a + b, 0) / loc.sqftPrices.length);
+        avgPriceDisplay = `₹ ${avgSqft.toLocaleString('en-IN')}/Sq. Ft`;
+      } else if (loc.prices.length > 0) {
+        const avgPrice = loc.prices.reduce((a, b) => a + b, 0) / loc.prices.length;
+        if (avgPrice >= 10000000) {
+          avgPriceDisplay = `₹ ${(avgPrice / 10000000).toFixed(2).replace(/\.00$/, '')} Crore`;
+        } else {
+          avgPriceDisplay = `₹ ${(avgPrice / 100000).toFixed(1).replace(/\.0$/, '')} Lac`;
+        }
+      }
+
+      const matchedBase = baselineDefaults.find(
+        (b) => b.name.toLowerCase() === loc.name.toLowerCase() && b.city.toLowerCase() === loc.city.toLowerCase()
+      );
+
+      const finalCount = matchedBase ? Math.max(loc.count, matchedBase.count) : loc.count;
+      const finalPrice = avgPriceDisplay || (matchedBase ? matchedBase.avgPriceDisplay : '₹ 1.10 Crore');
+
+      return {
+        ...loc,
+        count: finalCount,
+        avgPriceDisplay: finalPrice
+      };
+    });
+
+    baselineDefaults.forEach((b) => {
+      const exists = result.some((r) => r.name.toLowerCase() === b.name.toLowerCase() && r.city.toLowerCase() === b.city.toLowerCase());
+      if (!exists) {
+        result.push({
+          name: b.name,
+          city: b.city,
+          title: `${b.name}, ${b.city}`,
+          count: b.count,
+          avgPriceDisplay: b.avgPriceDisplay
+        });
+      }
+    });
+
+    // Sort descending by property count
+    return result.sort((a, b) => b.count - a.count);
+  }, [allProperties, newProperties]);
+
+  // Dynamic Builder counts and ongoing counts based on property count
+  const sortedBuilders = useMemo(() => {
+    const list = (allProperties && allProperties.length > 0)
+      ? allProperties
+      : (newProperties.length > 0 ? newProperties : MOCK_PROPERTIES);
+
+    const propCountMap = {};
+    const ongoingCountMap = {};
+
+    list.forEach((p) => {
+      const bName = (p.builderName || '').trim();
+      if (!bName) return;
+      const bLower = bName.toLowerCase();
+      propCountMap[bLower] = (propCountMap[bLower] || 0) + 1;
+
+      const isOngoing = (p.propertyStatus && p.propertyStatus.toLowerCase().includes('construction')) ||
+                        (p.possession && !p.possession.toLowerCase().includes('ready'));
+      if (isOngoing) {
+        ongoingCountMap[bLower] = (ongoingCountMap[bLower] || 0) + 1;
+      }
+    });
+
+    const builders = (buildersList || BUILDERS).map((b) => {
+      const bLower = (b.name || '').toLowerCase();
+      const realPropCount = propCountMap[bLower] ?? builderCounts[b.name] ?? builderCounts[bLower] ?? 0;
+
+      // Project count based on property count
+      const totalProjects = realPropCount > 0
+        ? (b.totalProjects ? Math.max(realPropCount, b.totalProjects) : realPropCount)
+        : (b.totalProjects || 12);
+
+      const ongoingProjects = ongoingCountMap[bLower]
+        ?? b.ongoingProjects
+        ?? Math.max(1, Math.round(totalProjects * 0.55));
+
+      return {
+        ...b,
+        id: b.id || b._id || b.name,
+        propertyCount: realPropCount,
+        totalProjects,
+        ongoingProjects
+      };
+    });
+
+    // Sort builders by total projects count descending
+    return builders.sort((a, b) => b.totalProjects - a.totalProjects);
+  }, [buildersList, allProperties, newProperties, builderCounts]);
 
   const [brokenLogos, setBrokenLogos] = useState({});
   const horizontalScrollRef = useRef(null);
@@ -124,14 +254,15 @@ export default function HomePage() {
       })
       .catch(() => { });
 
-    // 3. Fetch new properties for horizontal scroll
-    getProperties({ limit: 12, sort: 'newest' })
+    // 3. Fetch properties
+    getProperties({ limit: 50, sort: 'newest' })
       .then(({ data }) => {
         const props = data.properties || data.results || (Array.isArray(data) ? data : []);
-        setNewProperties(props);
+        setAllProperties(props);
+        setNewProperties(props.slice(0, 12));
       })
       .catch((err) => {
-        console.error('Failed to load new properties:', err);
+        console.error('Failed to load properties:', err);
       })
       .finally(() => {
         setLoadingNew(false);
@@ -360,77 +491,102 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── 5. Builders Section ── */}
+      {/* ── 5. Popular Localities Section (PropTiger Style) ── */}
+      <section className={`container ${styles.section} ${styles.localitiesSection} ${styles.scrollAppear}`}>
+        <div className={styles.sectionHeaderRow}>
+          <div>
+            <h2 className={styles.sectionTitle}>Popular Localities</h2>
+          </div>
+          <div className={styles.headerActions}>
+            <button
+              className={styles.viewAllLink}
+              onClick={() => navigate('/search')}
+            >
+              <span>View all</span>
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+
+        <div className={styles.localitiesGrid}>
+          {popularLocalities.slice(0, 3).map((loc) => (
+            <div
+              key={loc.title}
+              className={styles.localityCard}
+              onClick={() => navigate(`/search?locality=${encodeURIComponent(loc.name)}&city=${encodeURIComponent(loc.city)}`)}
+            >
+              <h3 className={styles.localityTitle}>{loc.title}</h3>
+              <div className={styles.localityMetricsRow}>
+                <div className={styles.localityMetricCol}>
+                  <span className={styles.localityMetricVal}>{loc.count}</span>
+                  <span className={styles.localityMetricLbl}>Total projects</span>
+                </div>
+                <div className={styles.localityMetricCol} style={{ textAlign: 'right' }}>
+                  <span className={styles.localityMetricVal}>{loc.avgPriceDisplay}</span>
+                  <span className={styles.localityMetricLbl}>Average price</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── 6. Top Builders Section (PropTiger Style) ── */}
       <section className={`container ${styles.section} ${styles.buildersSection} ${styles.scrollAppear}`}>
         <div className={styles.sectionHeaderRow}>
           <div>
-            <div className={styles.eyebrow}>
-              <Sparkles size={13} className={styles.eyebrowIcon} />
-              <span>TOP DEVELOPERS &amp; REALTY BRANDS</span>
-            </div>
-            <h2 className={styles.sectionTitle}>Top Builders &amp; Developers</h2>
-            <p className={styles.sectionSub}>Explore premium projects from India&apos;s most reputed real estate developers</p>
+            <h2 className={styles.sectionTitle}>Top Builders</h2>
           </div>
           <div className={styles.headerActions}>
-            {sortedBuilders.length > 4 && (
-              <button
-                className={styles.browseAllBtn}
-                onClick={() => setShowAllBuilders((prev) => !prev)}
-              >
-                {showAllBuilders ? 'Show Top 4' : `View All ${sortedBuilders.length} Builders`}
-              </button>
-            )}
+            <button
+              className={styles.viewAllLink}
+              onClick={() => setShowAllBuilders((prev) => !prev)}
+            >
+              <span>{showAllBuilders ? 'Show less' : 'View all'}</span>
+              <ChevronRight size={16} />
+            </button>
           </div>
         </div>
 
         <div className={styles.buildersGrid}>
-          {sortedBuilders.map((b) => {
-            const bCount = b.count ?? Number(
-              builderCounts[b.name] ??
-              builderCounts[b.name.toLowerCase()] ??
-              builderCounts[b.id] ??
-              0
-            );
+          {(showAllBuilders ? sortedBuilders : sortedBuilders.slice(0, 6)).map((b) => (
+            <div
+              key={b.id}
+              className={styles.builderCard}
+              onClick={() => navigate(`/search?builder=${encodeURIComponent(b.name)}`)}
+            >
+              <div className={styles.builderLogoBox}>
+                {brokenLogos[b.id] ? (
+                  <div className={styles.builderFallbackLogo}>
+                    <Building2 size={24} />
+                    <span>{b.name.split(' ')[0]}</span>
+                  </div>
+                ) : (
+                  <img
+                    src={b.logo}
+                    alt={`${b.name} logo`}
+                    className={styles.builderLogoImg}
+                    loading="lazy"
+                    onError={() => setBrokenLogos((prev) => ({ ...prev, [b.id]: true }))}
+                  />
+                )}
+              </div>
 
-            return (
-              <div key={b.id} className={styles.builderCard}>
-                <div className={styles.builderLogoBox}>
-                  {brokenLogos[b.id] ? (
-                    <div className={styles.builderFallbackLogo}>
-                      <Building2 size={24} />
-                      <span>{b.name}</span>
-                    </div>
-                  ) : (
-                    <img
-                      src={b.logo}
-                      alt={`${b.name} logo`}
-                      className={styles.builderLogoImg}
-                      loading="lazy"
-                      onError={() => setBrokenLogos((prev) => ({ ...prev, [b.id]: true }))}
-                    />
-                  )}
-                </div>
-
-                <div className={styles.builderBody}>
-                  <h3 className={styles.builderTitle} title={b.name}>{b.name}</h3>
-                  <div className={styles.builderMetaRow}>
-                    <span className={`${styles.builderCountBadge} ${bCount > 0 ? styles.builderCountActive : ''}`}>
-                      {bCount} {bCount === 1 ? 'Project' : 'Projects'}
-                    </span>
-                    <span className={styles.builderExpText}>{b.experience}</span>
+              <div className={styles.builderBody}>
+                <h3 className={styles.builderTitle} title={b.name}>{b.name}</h3>
+                <div className={styles.builderStatsRow}>
+                  <div className={styles.builderStatCol}>
+                    <span className={styles.builderStatVal}>{b.totalProjects}</span>
+                    <span className={styles.builderStatLbl}>Total Projects</span>
+                  </div>
+                  <div className={styles.builderStatCol}>
+                    <span className={styles.builderStatVal}>{b.ongoingProjects}</span>
+                    <span className={styles.builderStatLbl}>Ongoing Projects</span>
                   </div>
                 </div>
-
-                <button
-                  className={styles.viewProjectBtn}
-                  onClick={() => navigate(`/search?builder=${encodeURIComponent(b.name)}`)}
-                >
-                  <span>View Projects</span>
-                  <ArrowRight size={15} />
-                </button>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       </section>
 

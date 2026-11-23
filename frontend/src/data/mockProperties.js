@@ -578,6 +578,744 @@ export const MOCK_PROPERTIES = [
     ownerEmail: 'sales@puravankara.com',
     views: 1650
   }
+,
+  {
+    "id": "prop-godrej-palm-retreat-pune",
+    "_id": "prop-godrej-palm-retreat-pune",
+    "title": "Godrej Palm Retreat - Resort Style Residences",
+    "propertyName": "Godrej Palm Retreat",
+    "builderName": "Godrej Properties",
+    "location": "Camp, Pune Cantonment, Pune",
+    "locality": "Camp",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "address": "Near Pune Station & MG Road, Camp, Pune, Maharashtra 411001",
+    "postalCode": "411001",
+    "lat": 18.5167,
+    "lng": 73.8789,
+    "price": "₹ 1.13 Cr",
+    "priceRaw": 11300000,
+    "priceUnit": "Cr",
+    "priceNote": "All inclusive pricing with zero brokerage",
+    "perSqft": "₹ 8,200 / sq.ft",
+    "possession": "Under Construction",
+    "possessionDate": "December 2027",
+    "propertyStatus": "Under Construction",
+    "propertyAge": "Under Construction",
+    "buildingType": "Residential",
+    "listingType": "Sell",
+    "propertyType": "Apartment",
+    "userType": "Developer",
+    "bedroom": "2 BHK, 3 BHK",
+    "bathroom": 2,
+    "balconies": 2,
+    "doorFacing": "East",
+    "furnishingStatus": "Semi-Furnished",
+    "totalFloors": 22,
+    "selectedFloor": 12,
+    "totalProjectFloors": 22,
+    "maintenanceCharge": "₹ 4,200 / month",
+    "reraNumber": "P52100021389",
+    "propertyHighlights": [
+      "Low Density Resort Style Living in Historic Camp",
+      "Lavish 25,000 sq.ft Clubhouse with Heated Pool",
+      "5 Minutes from Pune Railway Station and MG Road"
+    ],
+    "description": "Godrej Palm Retreat brings ultra-modern resort-themed living to the heart of Camp, Pune with sprawling sky gardens, infinity pool, and seamless metro access.",
+    "unitConfigurations": [
+      {
+        "bhk": "2 BHK",
+        "type": "Premium 2 BHK",
+        "superArea": "1,120 sq.ft",
+        "carpetArea": "840 sq.ft",
+        "price": "₹ 1.13 Cr",
+        "priceBreakup": "Base price ₹ 95 Lac + Parking & Amenities ₹ 18 Lac",
+        "status": "Available"
+      },
+      {
+        "bhk": "3 BHK",
+        "type": "Luxury 3 BHK",
+        "superArea": "1,560 sq.ft",
+        "carpetArea": "1,180 sq.ft",
+        "price": "₹ 1.75 Cr",
+        "priceBreakup": "Base price ₹ 1.48 Cr + Premium facing & 2 Parkings",
+        "status": "Fast Selling"
+      }
+    ],
+    "image": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&auto=format&fit=crop&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&auto=format&fit=crop&q=80"
+    ],
+    "floorPlanImages": [
+      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&auto=format&fit=crop&q=80"
+    ],
+    "propertyVideo": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "propertyBrochure": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    "amenities": [
+      "Resort Swimming Pool",
+      "Gymnasium",
+      "Landscaped Garden",
+      "Clubhouse",
+      "Children Play Area",
+      "24/7 Security"
+    ],
+    "amenitiesText": "Resort Swimming Pool, Gymnasium, Landscaped Garden, Clubhouse, Children Play Area, 24/7 Security",
+    "paymentPlans": [
+      {
+        "title": "Special 20:80 Payment Plan",
+        "type": "Construction Linked",
+        "description": "Pay 20% on booking, 80% on possession"
+      }
+    ],
+    "landmarks": [
+      {
+        "category": "Transit",
+        "name": "Pune Junction",
+        "distance": "1.8 km"
+      },
+      {
+        "category": "Commercial",
+        "name": "MG Road Commercial Strip",
+        "distance": "0.8 km"
+      }
+    ],
+    "faqs": [
+      {
+        "q": "Is it RERA approved?",
+        "a": "Yes, registered with MahaRERA under P52100021389."
+      }
+    ],
+    "badges": [
+      {
+        "label": "Resort Living",
+        "variant": "green"
+      }
+    ],
+    "ownerName": "Godrej Sales Lounge",
+    "ownerPhone": "+919176663200",
+    "ownerEmail": "sales@godrejproperties.com",
+    "views": 1840
+  },
+  {
+    "id": "prop-purva-silversky-pune",
+    "_id": "prop-purva-silversky-pune",
+    "title": "Purva Silversky - Modern Valley Facing Homes",
+    "propertyName": "Purva Silversky",
+    "builderName": "Puravankara Limited",
+    "location": "Chimbali, Pune",
+    "locality": "Chimbali",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "address": "Near Alandi-Chakan Road, Chimbali, Pune, Maharashtra 410501",
+    "postalCode": "410501",
+    "lat": 18.6754,
+    "lng": 73.8682,
+    "price": "₹ 68.5 Lac",
+    "priceRaw": 6850000,
+    "priceUnit": "Lac",
+    "priceNote": "Exclusive launch discounts applicable",
+    "perSqft": "₹ 5,760 / sq.ft",
+    "possession": "Under Construction",
+    "possessionDate": "March 2028",
+    "propertyStatus": "Under Construction",
+    "propertyAge": "Under Construction",
+    "buildingType": "Residential",
+    "listingType": "Sell",
+    "propertyType": "Apartment",
+    "userType": "Developer",
+    "bedroom": "2 BHK, 3 BHK",
+    "bathroom": 2,
+    "balconies": 2,
+    "doorFacing": "North-East",
+    "furnishingStatus": "Semi-Furnished",
+    "totalFloors": 18,
+    "selectedFloor": 9,
+    "totalProjectFloors": 18,
+    "maintenanceCharge": "₹ 3,200 / month",
+    "reraNumber": "P52100028912",
+    "propertyHighlights": [
+      "Strategic Location near Talawade IT Park & Chakan MIDC",
+      "Panoramic Hillside & Valley Views",
+      "BluNex Smart Home Automation with Voice Controls"
+    ],
+    "description": "Purva Silversky in Chimbali offers intelligently planned 2 & 3 BHK homes with luxury amenities, landscaped podiums, and excellent connectivity to PCMC industrial belts.",
+    "unitConfigurations": [
+      {
+        "bhk": "2 BHK",
+        "type": "Smart 2 BHK",
+        "superArea": "1,040 sq.ft",
+        "carpetArea": "760 sq.ft",
+        "price": "₹ 68.5 Lac",
+        "priceBreakup": "All inclusive pricing",
+        "status": "Available"
+      }
+    ],
+    "image": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&auto=format&fit=crop&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&auto=format&fit=crop&q=80"
+    ],
+    "floorPlanImages": [
+      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&auto=format&fit=crop&q=80"
+    ],
+    "propertyVideo": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "propertyBrochure": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    "amenities": [
+      "Clubhouse",
+      "Swimming Pool",
+      "Badminton Court",
+      "Kids Play Zone",
+      "Jogging Track"
+    ],
+    "amenitiesText": "Clubhouse, Swimming Pool, Badminton Court, Kids Play Zone, Jogging Track",
+    "paymentPlans": [
+      {
+        "title": "10:90 Developer Plan",
+        "type": "Special Plan",
+        "description": "10% on booking, 90% at completion"
+      }
+    ],
+    "landmarks": [
+      {
+        "category": "Workplace",
+        "name": "Chakan Industrial Hub",
+        "distance": "6.0 km"
+      }
+    ],
+    "faqs": [
+      {
+        "q": "When is possession?",
+        "a": "Possession begins March 2028."
+      }
+    ],
+    "badges": [
+      {
+        "label": "Smart Homes",
+        "variant": "teal"
+      }
+    ],
+    "ownerName": "Puravankara Sales Desk",
+    "ownerPhone": "+919176663200",
+    "ownerEmail": "sales@puravankara.com",
+    "views": 1320
+  },
+  {
+    "id": "prop-kohinoor-viva-dudulgaon",
+    "_id": "prop-kohinoor-viva-dudulgaon",
+    "title": "Kohinoor Viva City - Elevated Modern High-Rise",
+    "propertyName": "Kohinoor Viva City",
+    "builderName": "Kohinoor Group Pune",
+    "location": "Dudulgaon, Moshi-Alandi Road, Pune",
+    "locality": "Dudulgaon",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "address": "Near Alandi Road, Dudulgaon, Pune, Maharashtra 412105",
+    "postalCode": "412105",
+    "lat": 18.6672,
+    "lng": 73.8741,
+    "price": "₹ 54.5 Lac",
+    "priceRaw": 5450000,
+    "priceUnit": "Lac",
+    "priceNote": "Best price guarantee in Dudulgaon",
+    "perSqft": "₹ 4,646 / sq.ft",
+    "possession": "Under Construction",
+    "possessionDate": "June 2027",
+    "propertyStatus": "Under Construction",
+    "propertyAge": "Under Construction",
+    "buildingType": "Residential",
+    "listingType": "Sell",
+    "propertyType": "Apartment",
+    "userType": "Developer",
+    "bedroom": "2 BHK, 3 BHK",
+    "bathroom": 2,
+    "balconies": 1,
+    "doorFacing": "East",
+    "furnishingStatus": "Unfurnished",
+    "totalFloors": 24,
+    "selectedFloor": 11,
+    "totalProjectFloors": 24,
+    "maintenanceCharge": "₹ 2,800 / month",
+    "reraNumber": "P52100031849",
+    "propertyHighlights": [
+      "Sada Sukhi Raho Guarantee by Kohinoor",
+      "30+ Lifestyle Amenities including Sky Walk and Infinity Pool",
+      "Direct Connectivity to Pune Ring Road and BRTS Corridor"
+    ],
+    "description": "Kohinoor Viva City at Dudulgaon features premium high-rise residences crafted for contemporary urban families with top-tier education institutes and retail corridors nearby.",
+    "unitConfigurations": [
+      {
+        "bhk": "2 BHK",
+        "type": "Deluxe 2 BHK",
+        "superArea": "980 sq.ft",
+        "carpetArea": "710 sq.ft",
+        "price": "₹ 54.5 Lac",
+        "priceBreakup": "All inclusive",
+        "status": "Available"
+      }
+    ],
+    "image": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&auto=format&fit=crop&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&auto=format&fit=crop&q=80"
+    ],
+    "floorPlanImages": [
+      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&auto=format&fit=crop&q=80"
+    ],
+    "propertyVideo": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "propertyBrochure": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    "amenities": [
+      "Sky Walk",
+      "Gymnasium",
+      "Landscaped Garden",
+      "Amphitheatre",
+      "Senior Citizen Park"
+    ],
+    "amenitiesText": "Sky Walk, Gymnasium, Landscaped Garden, Amphitheatre, Senior Citizen Park",
+    "paymentPlans": [
+      {
+        "title": "Flexi Booking Plan",
+        "type": "Construction Linked",
+        "description": "Easy milestone installments"
+      }
+    ],
+    "landmarks": [
+      {
+        "category": "Transit",
+        "name": "BRTS Station",
+        "distance": "0.4 km"
+      }
+    ],
+    "faqs": [
+      {
+        "q": "Is water available?",
+        "a": "Dual supply with PCMC and borewell filtration."
+      }
+    ],
+    "badges": [
+      {
+        "label": "High ROI",
+        "variant": "green"
+      }
+    ],
+    "ownerName": "Kohinoor Direct Sales",
+    "ownerPhone": "+919176663200",
+    "ownerEmail": "sales@kohinoorpune.com",
+    "views": 1910
+  },
+  {
+    "id": "prop-kolte-life-republic-pune",
+    "_id": "prop-kolte-life-republic-pune",
+    "title": "Kolte Patil Life Republic - Integrated 400-Acre Township",
+    "propertyName": "Kolte Patil Life Republic",
+    "builderName": "Kolte Patil Developers",
+    "location": "Hinjawadi, Pune",
+    "locality": "Hinjawadi",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "address": "Near Hinjawadi IT Park Phase 1 & 2, Hinjawadi, Pune, Maharashtra 411057",
+    "postalCode": "411057",
+    "lat": 18.5912,
+    "lng": 73.7389,
+    "price": "₹ 78.0 Lac",
+    "priceRaw": 7800000,
+    "priceUnit": "Lac",
+    "priceNote": "Direct builder inventory with tax concessions",
+    "perSqft": "₹ 6,300 / sq.ft",
+    "possession": "Under Construction",
+    "possessionDate": "December 2026",
+    "propertyStatus": "Under Construction",
+    "propertyAge": "Under Construction",
+    "buildingType": "Residential",
+    "listingType": "Sell",
+    "propertyType": "Apartment",
+    "userType": "Developer",
+    "bedroom": "2 BHK, 3 BHK",
+    "bathroom": 2,
+    "balconies": 2,
+    "doorFacing": "North",
+    "furnishingStatus": "Semi-Furnished",
+    "totalFloors": 26,
+    "selectedFloor": 15,
+    "totalProjectFloors": 26,
+    "maintenanceCharge": "₹ 3,500 / month",
+    "reraNumber": "P52100017116",
+    "propertyHighlights": [
+      "400-Acre Integrated Township with Anisha Global School inside",
+      "Walking distance from major IT campuses (Infosys, Wipro, TCS)",
+      "Operational shopping mall, hospital & sports complex inside campus"
+    ],
+    "description": "Kolte Patil Life Republic is one of Pune's most iconic integrated townships offering an idyllic lifestyle with lush green parks, community lakes, and premier sports arenas.",
+    "unitConfigurations": [
+      {
+        "bhk": "2 BHK",
+        "type": "Township 2 BHK",
+        "superArea": "1,090 sq.ft",
+        "carpetArea": "810 sq.ft",
+        "price": "₹ 78.0 Lac",
+        "priceBreakup": "All inclusive",
+        "status": "Available"
+      }
+    ],
+    "image": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&auto=format&fit=crop&q=80"
+    ],
+    "floorPlanImages": [
+      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&auto=format&fit=crop&q=80"
+    ],
+    "propertyVideo": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "propertyBrochure": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    "amenities": [
+      "Mega Township Club",
+      "Olympic Swimming Pool",
+      "Cricket Ground",
+      "Skating Rink",
+      "24/7 Gated Security"
+    ],
+    "amenitiesText": "Mega Township Club, Olympic Swimming Pool, Cricket Ground, Skating Rink, 24/7 Gated Security",
+    "paymentPlans": [
+      {
+        "title": "Township Flexi Scheme",
+        "type": "Construction Linked",
+        "description": "Pay as the construction proceeds"
+      }
+    ],
+    "landmarks": [
+      {
+        "category": "Tech Park",
+        "name": "Infosys Hinjawadi Campus",
+        "distance": "2.5 km"
+      }
+    ],
+    "faqs": [
+      {
+        "q": "Is there a school inside?",
+        "a": "Yes, Anisha Global School is fully operational on campus."
+      }
+    ],
+    "badges": [
+      {
+        "label": "Mega Township",
+        "variant": "green"
+      }
+    ],
+    "ownerName": "Kolte Patil Official Desk",
+    "ownerPhone": "+919176663200",
+    "ownerEmail": "sales@koltepatil.com",
+    "views": 2240
+  },
+  {
+    "id": "prop-lodha-bella-vita-pune",
+    "_id": "prop-lodha-bella-vita-pune",
+    "title": "Lodha Bella Vita - European-Inspired Forest Living",
+    "propertyName": "Lodha Bella Vita",
+    "builderName": "Lodha Group",
+    "location": "Camp, Pune",
+    "locality": "Camp",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "address": "Near Command Hospital, Camp, Pune, Maharashtra 411040",
+    "postalCode": "411040",
+    "lat": 18.5089,
+    "lng": 73.8891,
+    "price": "₹ 1.20 Cr",
+    "priceRaw": 12000000,
+    "priceUnit": "Cr",
+    "priceNote": "Exclusive Lodha Privilege discounts",
+    "perSqft": "₹ 8,900 / sq.ft",
+    "possession": "Under Construction",
+    "possessionDate": "September 2027",
+    "propertyStatus": "Under Construction",
+    "propertyAge": "Under Construction",
+    "buildingType": "Residential",
+    "listingType": "Sell",
+    "propertyType": "Apartment",
+    "userType": "Developer",
+    "bedroom": "2 BHK, 3 BHK",
+    "bathroom": 2,
+    "balconies": 2,
+    "doorFacing": "East",
+    "furnishingStatus": "Semi-Furnished",
+    "totalFloors": 28,
+    "selectedFloor": 14,
+    "totalProjectFloors": 28,
+    "maintenanceCharge": "₹ 4,500 / month",
+    "reraNumber": "P52100045612",
+    "propertyHighlights": [
+      "Italian Marble Flooring & Floor-to-Ceiling French Windows",
+      "Surrounded by 100+ Acres of Protected Reserve Forest",
+      "Club Saint Amand with 5-Star Hospitality Services"
+    ],
+    "description": "Lodha Bella Vita is crafted for connoisseurs of fine living with Italian architecture, lush wooded gardens, and panoramic views of Pune cantonment greenery.",
+    "unitConfigurations": [
+      {
+        "bhk": "2 BHK",
+        "type": "Palatial 2 BHK",
+        "superArea": "1,160 sq.ft",
+        "carpetArea": "880 sq.ft",
+        "price": "₹ 1.20 Cr",
+        "priceBreakup": "All inclusive",
+        "status": "Available"
+      }
+    ],
+    "image": "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&auto=format&fit=crop&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80"
+    ],
+    "floorPlanImages": [
+      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&auto=format&fit=crop&q=80"
+    ],
+    "propertyVideo": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "propertyBrochure": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    "amenities": [
+      "European Grand Clubhouse",
+      "Infinity Edge Pool",
+      "Squash Court",
+      "Private Mini Theatre",
+      "Banquet Lawn"
+    ],
+    "amenitiesText": "European Grand Clubhouse, Infinity Edge Pool, Squash Court, Private Mini Theatre, Banquet Lawn",
+    "paymentPlans": [
+      {
+        "title": "Lodha Easy Pay",
+        "type": "Flexible Payment",
+        "description": "25% every 6 months"
+      }
+    ],
+    "landmarks": [
+      {
+        "category": "Medical",
+        "name": "Command Hospital",
+        "distance": "1.2 km"
+      }
+    ],
+    "faqs": [
+      {
+        "q": "Who is the architect?",
+        "a": "Designed by renowned international architectural masters."
+      }
+    ],
+    "badges": [
+      {
+        "label": "Luxury Edition",
+        "variant": "blue"
+      }
+    ],
+    "ownerName": "Lodha Luxury Gallery",
+    "ownerPhone": "+919176663200",
+    "ownerEmail": "luxury@lodhagroup.com",
+    "views": 2450
+  },
+  {
+    "id": "prop-prestige-lakeside-blr",
+    "_id": "prop-prestige-lakeside-blr",
+    "title": "Prestige Lakeside Habitat - Enchanted Disney Themed Homes",
+    "propertyName": "Prestige Lakeside Habitat",
+    "builderName": "Prestige Group",
+    "location": "Whitefield, Varthur Main Road, Bengaluru",
+    "locality": "Whitefield",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "address": "Varthur Main Road, Whitefield, Bengaluru, Karnataka 560087",
+    "postalCode": "560087",
+    "lat": 12.9421,
+    "lng": 77.7465,
+    "price": "₹ 1.40 Cr",
+    "priceRaw": 14000000,
+    "priceUnit": "Cr",
+    "priceNote": "Direct builder inventory ready for registration",
+    "perSqft": "₹ 8,100 / sq.ft",
+    "possession": "Ready to Move",
+    "possessionDate": "Ready to Move",
+    "propertyStatus": "Ready to Move",
+    "propertyAge": "1-2 Years",
+    "buildingType": "Residential",
+    "listingType": "Sell",
+    "propertyType": "Apartment",
+    "userType": "Developer",
+    "bedroom": "2 BHK, 3 BHK",
+    "bathroom": 2,
+    "balconies": 2,
+    "doorFacing": "East",
+    "furnishingStatus": "Semi-Furnished",
+    "totalFloors": 29,
+    "selectedFloor": 18,
+    "totalProjectFloors": 29,
+    "maintenanceCharge": "₹ 4,800 / month",
+    "reraNumber": "PRM/KA/RERA/1251/310/PR/170915/000176",
+    "propertyHighlights": [
+      "102-Acre Sprawling Lake-Facing Township in Whitefield",
+      "Overlooking Varthur Lake with Pristine Breeze",
+      "4 Grand Clubhouses & 80% Dedicated Open Green Landscape"
+    ],
+    "description": "Prestige Lakeside Habitat offers world-class residences overlooking the calm waters of Varthur Lake with premium sports complexes, convenience retail, and 24-hour concierge services.",
+    "unitConfigurations": [
+      {
+        "bhk": "2 BHK",
+        "type": "Lakeview 2 BHK",
+        "superArea": "1,215 sq.ft",
+        "carpetArea": "910 sq.ft",
+        "price": "₹ 1.40 Cr",
+        "priceBreakup": "All inclusive pricing",
+        "status": "Ready"
+      }
+    ],
+    "image": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&auto=format&fit=crop&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80"
+    ],
+    "floorPlanImages": [
+      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&auto=format&fit=crop&q=80"
+    ],
+    "propertyVideo": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "propertyBrochure": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    "amenities": [
+      "4 Clubhouses",
+      "Tennis & Badminton Courts",
+      "Olympic Pool",
+      "Lakefront Promenade",
+      "Cricket Pitch"
+    ],
+    "amenitiesText": "4 Clubhouses, Tennis & Badminton Courts, Olympic Pool, Lakefront Promenade, Cricket Pitch",
+    "paymentPlans": [
+      {
+        "title": "Ready to Move Bank Loan Plan",
+        "type": "Bank Approved",
+        "description": "Loan up to 85% approved from SBI and HDFC"
+      }
+    ],
+    "landmarks": [
+      {
+        "category": "Tech Corridor",
+        "name": "ITPL Whitefield",
+        "distance": "4.8 km"
+      }
+    ],
+    "faqs": [
+      {
+        "q": "Is it ready for occupancy?",
+        "a": "Yes, OC received and families already residing."
+      }
+    ],
+    "badges": [
+      {
+        "label": "Ready to Move",
+        "variant": "green"
+      }
+    ],
+    "ownerName": "Prestige Estates Direct",
+    "ownerPhone": "+919176663200",
+    "ownerEmail": "sales@prestigeconstructions.com",
+    "views": 3120
+  },
+  {
+    "id": "prop-brigade-cornerstone-blr",
+    "_id": "prop-brigade-cornerstone-blr",
+    "title": "Brigade Cornerstone Utopia - Integrated Smart City Living",
+    "propertyName": "Brigade Cornerstone Utopia",
+    "builderName": "Brigade Group",
+    "location": "Whitefield, Varthur Road, Bengaluru",
+    "locality": "Whitefield",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "address": "Varthur Main Road, Whitefield, Bengaluru, Karnataka 560087",
+    "postalCode": "560087",
+    "lat": 12.9468,
+    "lng": 77.749,
+    "price": "₹ 1.18 Cr",
+    "priceRaw": 11800000,
+    "priceUnit": "Cr",
+    "priceNote": "Special festival payment benefits available",
+    "perSqft": "₹ 7,600 / sq.ft",
+    "possession": "Under Construction",
+    "possessionDate": "June 2027",
+    "propertyStatus": "Under Construction",
+    "propertyAge": "Under Construction",
+    "buildingType": "Residential",
+    "listingType": "Sell",
+    "propertyType": "Apartment",
+    "userType": "Developer",
+    "bedroom": "2 BHK, 3 BHK",
+    "bathroom": 2,
+    "balconies": 2,
+    "doorFacing": "North-East",
+    "furnishingStatus": "Semi-Furnished",
+    "totalFloors": 26,
+    "selectedFloor": 12,
+    "totalProjectFloors": 26,
+    "maintenanceCharge": "₹ 4,000 / month",
+    "reraNumber": "PRM/KA/RERA/1251/446/PR/181122/002176",
+    "propertyHighlights": [
+      "47-Acre Integrated Smart High-Tech Township",
+      "Cineplex, Multiplex & High-Street Retail within premises",
+      "Pedestrian-Only Walkways & Butterfly Garden"
+    ],
+    "description": "Brigade Cornerstone Utopia is a vibrant, futuristic 47-acre integrated township in Whitefield designed to bring commercial offices, premium homes, and boutique high street retail together.",
+    "unitConfigurations": [
+      {
+        "bhk": "2 BHK",
+        "type": "Smart 2 BHK",
+        "superArea": "1,080 sq.ft",
+        "carpetArea": "790 sq.ft",
+        "price": "₹ 1.18 Cr",
+        "priceBreakup": "All inclusive",
+        "status": "Available"
+      }
+    ],
+    "image": "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=1200&auto=format&fit=crop&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&auto=format&fit=crop&q=80"
+    ],
+    "floorPlanImages": [
+      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&auto=format&fit=crop&q=80"
+    ],
+    "propertyVideo": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "propertyBrochure": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    "amenities": [
+      "Futuristic Clubhouse",
+      "Smart Gym",
+      "Retail High Street",
+      "Amphitheatre",
+      "Jogging Trail"
+    ],
+    "amenitiesText": "Futuristic Clubhouse, Smart Gym, Retail High Street, Amphitheatre, Jogging Trail",
+    "paymentPlans": [
+      {
+        "title": "Brigade 15:85 Easy Pay",
+        "type": "Construction Linked",
+        "description": "Pay 15% now, remainder across construction"
+      }
+    ],
+    "landmarks": [
+      {
+        "category": "Metro",
+        "name": "Kadugodi Whitefield Metro",
+        "distance": "3.8 km"
+      }
+    ],
+    "faqs": [
+      {
+        "q": "Is retail space included?",
+        "a": "Yes, high-street shopping and cinema are right inside."
+      }
+    ],
+    "badges": [
+      {
+        "label": "Future City",
+        "variant": "teal"
+      }
+    ],
+    "ownerName": "Brigade Group Sales Office",
+    "ownerPhone": "+919176663200",
+    "ownerEmail": "sales@brigadegroup.com",
+    "views": 2780
+  }
 ];
 
 export default MOCK_PROPERTIES;

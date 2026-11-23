@@ -295,7 +295,7 @@ export default function SearchResultsPage({ isSavedView: isSavedProp = false }) 
   /* ─€─€ URL params ─€─€ */
   const q            = searchParams.get('q')            || '';
   const builder      = searchParams.get('builder')      || '';
-  const localities   = searchParams.get('localities')   || ''; // comma-separated multi-locality
+  const localities   = searchParams.get('localities')   || searchParams.get('locality') || ''; // comma-separated multi-locality
   const city         = searchParams.get('city')         || '';
   const listingType  = searchParams.get('listingType')  || '';
   const propertyType = searchParams.get('propertyType') || '';
@@ -538,6 +538,28 @@ export default function SearchResultsPage({ isSavedView: isSavedProp = false }) 
             const t = (p.title || '').toLowerCase();
             const d = (p.description || '').toLowerCase();
             return b.includes(bLower) || t.includes(bLower) || d.includes(bLower);
+          });
+        }
+
+        // Client-side locality filter fallback
+        if (selectedLocalities.length > 0) {
+          const locLowers = selectedLocalities.map((l) => l.toLowerCase());
+          list = list.filter((p) => {
+            const pl = (p.locality || '').toLowerCase();
+            const pa = (p.address || '').toLowerCase();
+            const ploc = (p.location || '').toLowerCase();
+            return locLowers.some((l) => pl.includes(l) || pa.includes(l) || ploc.includes(l));
+          });
+        }
+
+        // Client-side city filter fallback
+        if (city) {
+          const cLower = city.toLowerCase();
+          list = list.filter((p) => {
+            const pc = (p.city || '').toLowerCase();
+            const pa = (p.address || '').toLowerCase();
+            const ploc = (p.location || '').toLowerCase();
+            return pc.includes(cLower) || pa.includes(cLower) || ploc.includes(cLower);
           });
         }
 

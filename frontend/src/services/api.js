@@ -24,7 +24,7 @@ export const sendPhoneOtp  = (data) => api.post('/auth/send-otp', data);
 export const phoneLogin    = (data) => api.post('/auth/phone-login', data);
 
 // ─── Properties (with rich mock fallback for 100% complete details) ─────────
-export const getProperties = async (params) => {
+export const getProperties = async (params = {}) => {
   try {
     const res = await api.get('/properties', { params });
     const list = res.data?.properties || res.data?.results || [];
@@ -34,12 +34,27 @@ export const getProperties = async (params) => {
   } catch (err) {
     console.warn('[API fallback] Backend offline or unavailable, using rich mock properties');
   }
+
+  let filtered = [...MOCK_PROPERTIES];
+  if (params.builder) {
+    const bLower = params.builder.toLowerCase();
+    filtered = filtered.filter(p => (p.builderName || '').toLowerCase().includes(bLower));
+  }
+  if (params.city) {
+    const cLower = params.city.toLowerCase();
+    filtered = filtered.filter(p => (p.city || '').toLowerCase().includes(cLower));
+  }
+  if (params.locality || params.localities) {
+    const targetLoc = (params.locality || params.localities).toLowerCase();
+    filtered = filtered.filter(p => (p.locality || '').toLowerCase().includes(targetLoc));
+  }
+
   return {
     data: {
       success: true,
-      properties: MOCK_PROPERTIES,
-      results: MOCK_PROPERTIES,
-      total: MOCK_PROPERTIES.length
+      properties: filtered,
+      results: filtered,
+      total: filtered.length
     }
   };
 };
@@ -125,15 +140,19 @@ export const getBuilderCounts = async () => {
     const res = await api.get('/properties/builder-counts');
     if (res.data?.counts) return res;
   } catch (_) {}
+
+  // Compute dynamically from MOCK_PROPERTIES
+  const counts = {};
+  MOCK_PROPERTIES.forEach(p => {
+    if (p.builderName) {
+      counts[p.builderName] = (counts[p.builderName] || 0) + 1;
+    }
+  });
+
   return {
     data: {
       success: true,
-      counts: {
-        'Godrej Properties': 8,
-        'Brigade Group': 6,
-        'Prestige Group': 7,
-        'Puravankara Limited': 5
-      }
+      counts
     }
   };
 };
