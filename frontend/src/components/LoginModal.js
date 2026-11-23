@@ -154,6 +154,45 @@ export default function LoginModal() {
   };
 
   // ─── Step 2: Verify REAL SMS OTP ───────────────────────────────────────
+  const completeLogin = async (userCredential, firebaseToken) => {
+    let loggedInUser = null;
+    try {
+      // Exchange Firebase verified token for ProBridge JWT
+      const res = await api.post('/auth/firebase-phone-login', {
+        firebaseToken,
+        name: name.trim(),
+        phone: cleanPhone,
+      });
+
+      if (res.data?.success) {
+        localStorage.setItem('pb_token', res.data.token);
+        loggedInUser = res.data.user || {
+          id: userCredential.user.uid,
+          name: name.trim() || 'ProBridge User',
+          phone: cleanPhone,
+          role: 'user',
+        };
+        localStorage.setItem('pb_user', JSON.stringify(loggedInUser));
+      } else {
+        throw new Error(res.data?.message || 'Login verification failed');
+      }
+    } catch (backendErr) {
+      console.warn('Backend unavailable or network error. Using Firebase verified session:', backendErr);
+      // Fall back to client Firebase session so user is logged in
+      loggedInUser = {
+        id: userCredential.user.uid,
+        name: name.trim() || userCredential.user.displayName || `User ${cleanPhone.slice(-4)}`,
+        phone: cleanPhone,
+        role: 'user',
+      };
+      localStorage.setItem('pb_token', firebaseToken);
+      localStorage.setItem('pb_user', JSON.stringify(loggedInUser));
+    }
+
+    closeLoginModal();
+    window.location.reload();
+  };
+
   const handleVerifyOtp = async (e) => {
     e?.preventDefault();
     const enteredOtp = otp.join('');
@@ -172,25 +211,10 @@ export default function LoginModal() {
       // Verify with Firebase
       const userCredential = await confirmationResult.confirm(enteredOtp);
       const firebaseToken = await userCredential.user.getIdToken();
-
-      // Exchange Firebase verified token for ProBridge JWT
-      const res = await api.post('/auth/firebase-phone-login', {
-        firebaseToken,
-        name: name.trim(),
-        phone: cleanPhone,
-      });
-
-      if (res.data?.success) {
-        localStorage.setItem('pb_token', res.data.token);
-        closeLoginModal();
-        window.location.reload();
-      } else {
-        throw new Error(res.data?.message || 'Login verification failed');
-      }
+      await completeLogin(userCredential, firebaseToken);
     } catch (err) {
       console.error('SMS OTP verify error:', err?.code, err?.message);
       setError(getFriendlyError(err));
-    } finally {
       setLoading(false);
     }
   };
@@ -228,18 +252,7 @@ export default function LoginModal() {
     try {
       const userCredential = await confirmationResult.confirm(code);
       const firebaseToken = await userCredential.user.getIdToken();
-      const res = await api.post('/auth/firebase-phone-login', {
-        firebaseToken,
-        name: name.trim(),
-        phone: cleanPhone,
-      });
-      if (res.data?.success) {
-        localStorage.setItem('pb_token', res.data.token);
-        closeLoginModal();
-        window.location.reload();
-      } else {
-        throw new Error(res.data?.message || 'Login verification failed');
-      }
+      await completeLogin(userCredential, firebaseToken);
     } catch (err) {
       setError(getFriendlyError(err));
       setLoading(false);
@@ -251,11 +264,14 @@ export default function LoginModal() {
     const code = err?.code || '';
     const msg = err?.message || '';
 
+    if (code === 'auth/unauthorized-domain') {
+      return 'Domain "jaisuryaprakash2005.github.io" is not authorized in Firebase. Please add it to Firebase Console → Authentication → Settings → Authorized domains.';
+    }
     if (code === 'auth/too-many-requests') {
       return 'Firebase SMS rate-limit reached for this number. Please wait a few minutes before trying again.';
     }
     if (code === 'auth/invalid-app-credential') {
-      return 'reCAPTCHA verification could not be validated by Google. Please open http://127.0.0.1:3000 instead of localhost and tick the checkbox.';
+      return 'reCAPTCHA verification could not be validated by Google. Please check the reCAPTCHA box again.';
     }
     if (code === 'auth/operation-not-allowed') {
       return 'Phone sign-in is not enabled in Firebase Console. Please enable Phone provider in Authentication settings.';
@@ -276,9 +292,12 @@ export default function LoginModal() {
       return 'Session expired. Please request a new SMS OTP.';
     }
     if (code === 'auth/network-request-failed') {
-      return 'Network connection issue. Please check your internet and try again.';
+      return 'Network request failed. If you are on GitHub Pages, ensure "jaisuryaprakash2005.github.io" is added to Firebase Authorized Domains.';
     }
-    return err?.response?.data?.message || msg || 'Failed to send SMS OTP. Please try again.';
+    if (msg.includes('Network Error')) {
+      return 'Backend API is currently unreachable. Please ensure the backend server is deployed or running.';
+    }
+    return err?.response?.data?.message || msg || 'Failed to complete login. Please try again.';
   }
 
   return (

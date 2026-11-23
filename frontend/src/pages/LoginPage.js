@@ -62,7 +62,8 @@ export default function LoginPage() {
       setStep(2);
       setResendTimer(30);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to send OTP. Please try again.');
+      const msg = err.response?.data?.message || (err.message?.includes('Network Error') ? 'Backend API is unreachable. Please verify your backend server is deployed.' : 'Failed to send OTP. Please try again.');
+      setError(msg);
     } finally {
       setLoading(false);
     }
