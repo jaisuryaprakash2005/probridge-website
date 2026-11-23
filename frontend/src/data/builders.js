@@ -2,6 +2,14 @@
  * Top Builders and Real Estate Developers Directory
  * Curated for ProBridge Website
  */
+
+const getAssetUrl = (filename) => {
+  const base = typeof window !== 'undefined' && window.location.pathname.startsWith('/probridge-website')
+    ? '/probridge-website'
+    : (process.env.PUBLIC_URL || '');
+  return `${base}/${filename.replace(/^\/+/, '')}`;
+};
+
 export const BUILDERS = [
   {
     id: 'brigade',
@@ -22,7 +30,7 @@ export const BUILDERS = [
   {
     id: 'godrej',
     name: 'Godrej Properties',
-    logo: (process.env.PUBLIC_URL || '') + '/godrej-logo.png',
+    logo: getAssetUrl('godrej-logo.png'),
     experience: '32+ Years',
     established: '1990',
     headquarters: 'Mumbai',
