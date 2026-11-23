@@ -4,9 +4,8 @@ import HeroSearch from '../components/HeroSearch';
 import PropertyCard from '../components/PropertyCard';
 import EnquiryModal from '../components/EnquiryModal';
 import AdCarousel from '../components/AdCarousel';
-import { getProperties, getCategoryCounts, getBuilderCounts, getBuilders } from '../services/api';
+import { getProperties, getCategoryCounts, getBuilderCounts, getBuilders, getLocalityCounts } from '../services/api';
 import { BUILDERS } from '../data/builders';
-import { MOCK_PROPERTIES } from '../data/mockProperties';
 import {
   ShieldCheck, UserCheck, Percent, PhoneCall,
   Building2, Home, TreePine, Store, Landmark, BedDouble,
@@ -79,30 +78,35 @@ export default function HomePage() {
   const [categoryCounts, setCategoryCounts] = useState({});
   const [builderCounts, setBuilderCounts] = useState({});
   const [buildersList, setBuildersList] = useState(BUILDERS);
+  const [serverLocalities, setServerLocalities] = useState([]);
   const [allProperties, setAllProperties] = useState([]);
   const [newProperties, setNewProperties] = useState([]);
   const [loadingNew, setLoadingNew] = useState(true);
   const [showAllBuilders, setShowAllBuilders] = useState(false);
 
-  // Dynamic Popular Localities computed based on real property count in each locality
+  // Dynamic Popular Localities computed strictly based on existing property listings
   const popularLocalities = useMemo(() => {
+    if (serverLocalities && serverLocalities.length > 0) {
+      return serverLocalities;
+    }
+
     const list = (allProperties && allProperties.length > 0)
       ? allProperties
-      : (newProperties.length > 0 ? newProperties : MOCK_PROPERTIES);
+      : (newProperties && newProperties.length > 0 ? newProperties : []);
 
     const locMap = {};
 
     list.forEach((p) => {
       const loc = (p.locality || '').trim();
-      const city = (p.city || '').trim();
       if (!loc) return;
-      const key = `${loc}, ${city || 'India'}`;
+      const city = (p.city || '').trim();
+      const key = city ? `${loc}, ${city}` : loc;
 
       if (!locMap[key]) {
         locMap[key] = {
           name: loc,
           city: city,
-          title: city ? `${loc}, ${city}` : loc,
+          title: key,
           count: 0,
           prices: [],
           sqftPrices: [],
@@ -125,19 +129,9 @@ export default function HomePage() {
       }
     });
 
-    // Reference baseline localities matching Image 1
-    const baselineDefaults = [
-      { name: 'Camp', city: 'Pune', count: 3, avgPriceDisplay: '₹ 1.13 Crore' },
-      { name: 'Chimbali', city: 'Pune', count: 10, avgPriceDisplay: '₹ 5,760/Sq. Ft' },
-      { name: 'Dudulgaon', city: 'Pune', count: 27, avgPriceDisplay: '₹ 4,646/Sq. Ft' },
-      { name: 'Whitefield', city: 'Bengaluru', count: 18, avgPriceDisplay: '₹ 1.25 Crore' },
-      { name: 'Hebbal', city: 'Bengaluru', count: 14, avgPriceDisplay: '₹ 1.45 Crore' },
-      { name: 'Padur', city: 'Chennai', count: 8, avgPriceDisplay: '₹ 82.5 Lac' },
-    ];
-
     const result = Object.values(locMap).map((loc) => {
-      let avgPriceDisplay = '';
-      if (loc.sqftPrices.length > 0 && (loc.name === 'Chimbali' || loc.name === 'Dudulgaon' || loc.prices.length === 0)) {
+      let avgPriceDisplay = 'Price on Request';
+      if (loc.sqftPrices.length > 0) {
         const avgSqft = Math.round(loc.sqftPrices.reduce((a, b) => a + b, 0) / loc.sqftPrices.length);
         avgPriceDisplay = `₹ ${avgSqft.toLocaleString('en-IN')}/Sq. Ft`;
       } else if (loc.prices.length > 0) {
@@ -149,54 +143,34 @@ export default function HomePage() {
         }
       }
 
-      const matchedBase = baselineDefaults.find(
-        (b) => b.name.toLowerCase() === loc.name.toLowerCase() && b.city.toLowerCase() === loc.city.toLowerCase()
-      );
-
-      const finalCount = matchedBase ? Math.max(loc.count, matchedBase.count) : loc.count;
-      const finalPrice = avgPriceDisplay || (matchedBase ? matchedBase.avgPriceDisplay : '₹ 1.10 Crore');
-
       return {
         ...loc,
-        count: finalCount,
-        avgPriceDisplay: finalPrice
+        avgPriceDisplay
       };
     });
 
-    baselineDefaults.forEach((b) => {
-      const exists = result.some((r) => r.name.toLowerCase() === b.name.toLowerCase() && r.city.toLowerCase() === b.city.toLowerCase());
-      if (!exists) {
-        result.push({
-          name: b.name,
-          city: b.city,
-          title: `${b.name}, ${b.city}`,
-          count: b.count,
-          avgPriceDisplay: b.avgPriceDisplay
-        });
-      }
-    });
-
-    // Sort descending by property count
+    // Sort strictly by existing property count in that locality
     return result.sort((a, b) => b.count - a.count);
-  }, [allProperties, newProperties]);
+  }, [allProperties, newProperties, serverLocalities]);
 
-  // Dynamic Builder counts and ongoing counts based on property count
+  // Dynamic Builder counts and ongoing counts based strictly on existing property listings
   const sortedBuilders = useMemo(() => {
     const list = (allProperties && allProperties.length > 0)
       ? allProperties
-      : (newProperties.length > 0 ? newProperties : MOCK_PROPERTIES);
+      : (newProperties && newProperties.length > 0 ? newProperties : []);
 
     const propCountMap = {};
     const ongoingCountMap = {};
 
     list.forEach((p) => {
-      const bName = (p.builderName || '').trim();
+      const bName = (p.builderName || p.rawFormData?.builderName || '').trim();
       if (!bName) return;
       const bLower = bName.toLowerCase();
       propCountMap[bLower] = (propCountMap[bLower] || 0) + 1;
 
-      const isOngoing = (p.propertyStatus && p.propertyStatus.toLowerCase().includes('construction')) ||
-                        (p.possession && !p.possession.toLowerCase().includes('ready'));
+      const s = (p.propertyStatus || p.status || '').toLowerCase();
+      const poss = (p.possession || '').toLowerCase();
+      const isOngoing = s.includes('construction') || s.includes('ongoing') || (poss && !poss.includes('ready'));
       if (isOngoing) {
         ongoingCountMap[bLower] = (ongoingCountMap[bLower] || 0) + 1;
       }
@@ -204,27 +178,38 @@ export default function HomePage() {
 
     const builders = (buildersList || BUILDERS).map((b) => {
       const bLower = (b.name || '').toLowerCase();
-      const realPropCount = propCountMap[bLower] ?? builderCounts[b.name] ?? builderCounts[bLower] ?? 0;
+      const brandWord = bLower.split(' ')[0];
 
-      // Project count based on property count
-      const totalProjects = realPropCount > 0
-        ? (b.totalProjects ? Math.max(realPropCount, b.totalProjects) : realPropCount)
-        : (b.totalProjects || 12);
+      // Exact count of properties belonging to this builder in existing listings
+      let totalProjects = propCountMap[bLower] || 0;
+      let ongoingProjects = ongoingCountMap[bLower] || 0;
 
-      const ongoingProjects = ongoingCountMap[bLower]
-        ?? b.ongoingProjects
-        ?? Math.max(1, Math.round(totalProjects * 0.55));
+      // Also match brand keyword (e.g. "Godrej" in "Godrej Properties")
+      if (totalProjects === 0 && brandWord.length >= 4) {
+        Object.keys(propCountMap).forEach((k) => {
+          if (k.includes(brandWord) || brandWord.includes(k)) {
+            totalProjects += propCountMap[k];
+            ongoingProjects += (ongoingCountMap[k] || 0);
+          }
+        });
+      }
+
+      // If backend has DB counts, merge
+      if (builderCounts[b.name] !== undefined) {
+        totalProjects = Math.max(totalProjects, Number(builderCounts[b.name]) || 0);
+      } else if (builderCounts[bLower] !== undefined) {
+        totalProjects = Math.max(totalProjects, Number(builderCounts[bLower]) || 0);
+      }
 
       return {
         ...b,
         id: b.id || b._id || b.name,
-        propertyCount: realPropCount,
         totalProjects,
         ongoingProjects
       };
     });
 
-    // Sort builders by total projects count descending
+    // Sort builders by actual existing property count (highest count first)
     return builders.sort((a, b) => b.totalProjects - a.totalProjects);
   }, [buildersList, allProperties, newProperties, builderCounts]);
 
@@ -246,7 +231,16 @@ export default function HomePage() {
       })
       .catch(() => { });
 
-    // 2.1 Fetch dynamic builders added from Admin Dashboard
+    // 2.1 Fetch real locality counts from database
+    getLocalityCounts()
+      .then(({ data }) => {
+        if (data?.localities && data.localities.length > 0) {
+          setServerLocalities(data.localities);
+        }
+      })
+      .catch(() => { });
+
+    // 2.2 Fetch dynamic builders added from Admin Dashboard
     getBuilders()
       .then(({ data }) => {
         const list = data?.results || (Array.isArray(data) ? data : []);
@@ -492,44 +486,46 @@ export default function HomePage() {
       </section>
 
       {/* ── 5. Popular Localities Section (PropTiger Style) ── */}
-      <section className={`container ${styles.section} ${styles.localitiesSection} ${styles.scrollAppear}`}>
-        <div className={styles.sectionHeaderRow}>
-          <div>
-            <h2 className={styles.sectionTitle}>Popular Localities</h2>
+      {popularLocalities.length > 0 && (
+        <section className={`container ${styles.section} ${styles.localitiesSection} ${styles.scrollAppear}`}>
+          <div className={styles.sectionHeaderRow}>
+            <div>
+              <h2 className={styles.sectionTitle}>Popular Localities</h2>
+            </div>
+            <div className={styles.headerActions}>
+              <button
+                className={styles.viewAllLink}
+                onClick={() => navigate('/search')}
+              >
+                <span>View all</span>
+                <ChevronRight size={16} />
+              </button>
+            </div>
           </div>
-          <div className={styles.headerActions}>
-            <button
-              className={styles.viewAllLink}
-              onClick={() => navigate('/search')}
-            >
-              <span>View all</span>
-              <ChevronRight size={16} />
-            </button>
-          </div>
-        </div>
 
-        <div className={styles.localitiesGrid}>
-          {popularLocalities.slice(0, 3).map((loc) => (
-            <div
-              key={loc.title}
-              className={styles.localityCard}
-              onClick={() => navigate(`/search?locality=${encodeURIComponent(loc.name)}&city=${encodeURIComponent(loc.city)}`)}
-            >
-              <h3 className={styles.localityTitle}>{loc.title}</h3>
-              <div className={styles.localityMetricsRow}>
-                <div className={styles.localityMetricCol}>
-                  <span className={styles.localityMetricVal}>{loc.count}</span>
-                  <span className={styles.localityMetricLbl}>Total projects</span>
-                </div>
-                <div className={styles.localityMetricCol} style={{ textAlign: 'right' }}>
-                  <span className={styles.localityMetricVal}>{loc.avgPriceDisplay}</span>
-                  <span className={styles.localityMetricLbl}>Average price</span>
+          <div className={styles.localitiesGrid}>
+            {popularLocalities.slice(0, 3).map((loc) => (
+              <div
+                key={loc.title}
+                className={styles.localityCard}
+                onClick={() => navigate(`/search?locality=${encodeURIComponent(loc.name)}&city=${encodeURIComponent(loc.city)}`)}
+              >
+                <h3 className={styles.localityTitle}>{loc.title}</h3>
+                <div className={styles.localityMetricsRow}>
+                  <div className={styles.localityMetricCol}>
+                    <span className={styles.localityMetricVal}>{loc.count}</span>
+                    <span className={styles.localityMetricLbl}>{loc.count === 1 ? 'Total project' : 'Total projects'}</span>
+                  </div>
+                  <div className={styles.localityMetricCol} style={{ textAlign: 'right' }}>
+                    <span className={styles.localityMetricVal}>{loc.avgPriceDisplay}</span>
+                    <span className={styles.localityMetricLbl}>Average price</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ── 6. Top Builders Section (PropTiger Style) ── */}
       <section className={`container ${styles.section} ${styles.buildersSection} ${styles.scrollAppear}`}>
@@ -577,11 +573,11 @@ export default function HomePage() {
                 <div className={styles.builderStatsRow}>
                   <div className={styles.builderStatCol}>
                     <span className={styles.builderStatVal}>{b.totalProjects}</span>
-                    <span className={styles.builderStatLbl}>Total Projects</span>
+                    <span className={styles.builderStatLbl}>{b.totalProjects === 1 ? 'Total Project' : 'Total Projects'}</span>
                   </div>
                   <div className={styles.builderStatCol}>
                     <span className={styles.builderStatVal}>{b.ongoingProjects}</span>
-                    <span className={styles.builderStatLbl}>Ongoing Projects</span>
+                    <span className={styles.builderStatLbl}>{b.ongoingProjects === 1 ? 'Ongoing Project' : 'Ongoing Projects'}</span>
                   </div>
                 </div>
               </div>

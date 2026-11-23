@@ -80,7 +80,8 @@ export default function Footer() {
           <div className={styles.contactList}>
             <div className={styles.contactRow}>
               <MapPin size={18} className={styles.contactIcon} />
-              <span>First Floor, i5 Complex, 10-B, Ekambaram Industrial Estate Rd, Alapakkam, Karpaga Vinayagar Colony, Valasaravakkam, Chennai, Tamil Nadu 600116</span>
+              <span>314,IT Plaza - Nadd Hessa,Dubai Silicon Oasis,Dubai
+              </span>
             </div>
 
             <div className={styles.contactRow}>

@@ -157,6 +157,62 @@ export const getBuilderCounts = async () => {
   };
 };
 
+export const getLocalityCounts = async () => {
+  try {
+    const res = await api.get('/properties/locality-counts');
+    if (res.data?.localities) return res;
+  } catch (_) {}
+
+  // Compute dynamically from existing MOCK_PROPERTIES
+  const locMap = {};
+  MOCK_PROPERTIES.forEach((p) => {
+    const loc = (p.locality || '').trim();
+    if (!loc) return;
+    const city = (p.city || '').trim();
+    const key = city ? `${loc}, ${city}` : loc;
+
+    if (!locMap[key]) {
+      locMap[key] = {
+        name: loc,
+        city: city,
+        title: key,
+        count: 0,
+        prices: [],
+        sqftPrices: []
+      };
+    }
+    locMap[key].count += 1;
+    if (p.priceRaw) locMap[key].prices.push(Number(p.priceRaw));
+    if (p.perSqft) {
+      const sqftNum = Number(String(p.perSqft).replace(/[^0-9]/g, ''));
+      if (sqftNum > 0) locMap[key].sqftPrices.push(sqftNum);
+    }
+  });
+
+  const localities = Object.values(locMap).map((loc) => {
+    let avgPriceDisplay = 'Price on Request';
+    if (loc.sqftPrices.length > 0) {
+      const avgSqft = Math.round(loc.sqftPrices.reduce((a, b) => a + b, 0) / loc.sqftPrices.length);
+      avgPriceDisplay = `₹ ${avgSqft.toLocaleString('en-IN')}/Sq. Ft`;
+    } else if (loc.prices.length > 0) {
+      const avgPrice = loc.prices.reduce((a, b) => a + b, 0) / loc.prices.length;
+      if (avgPrice >= 10000000) {
+        avgPriceDisplay = `₹ ${(avgPrice / 10000000).toFixed(2).replace(/\.00$/, '')} Crore`;
+      } else {
+        avgPriceDisplay = `₹ ${(avgPrice / 100000).toFixed(1).replace(/\.0$/, '')} Lac`;
+      }
+    }
+    return { ...loc, avgPriceDisplay };
+  }).sort((a, b) => b.count - a.count);
+
+  return {
+    data: {
+      success: true,
+      localities
+    }
+  };
+};
+
 // ─── Search ─────────────────────────────────────────────────────────────────
 export const searchProperties = async (params) => {
   try {
