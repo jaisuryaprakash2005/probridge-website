@@ -19,9 +19,14 @@ function ScrollToTop() {
   return null;
 }
 
+// Auto-detect GitHub Pages repository subpath or root
+const basename = typeof window !== 'undefined' && window.location.pathname.startsWith('/probridge-website')
+  ? '/probridge-website'
+  : (process.env.PUBLIC_URL || '');
+
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <AuthProvider>
         <SavedProvider>
           <ScrollToTop />
@@ -44,6 +49,7 @@ function App() {
                 <Route path="/guide"              element={<InfoPage page="guide" />} />
                 <Route path="/nri-services"       element={<InfoPage page="nri-services" />} />
                 <Route path="/how-to-buy"         element={<InfoPage page="how-to-buy" />} />
+                <Route path="*"                   element={<Navigate to="/" replace />} />
               </Routes>
             </main>
             <Footer />
