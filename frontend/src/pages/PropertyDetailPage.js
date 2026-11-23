@@ -56,6 +56,7 @@ const TABS = [
   { id: 'home-loan', label: 'Home Loan', Icon: Calculator },
   { id: 'payment-plans', label: 'Payment Plans', Icon: FileText },
   { id: 'neighbourhood', label: 'Neighbourhood', Icon: Compass },
+  { id: 'brochure', label: 'Brochure', Icon: MessageCircle },
   { id: 'builder', label: 'Builder', Icon: Building2 },
   { id: 'faq', label: 'FAQ', Icon: HelpCircle },
 ];
@@ -690,6 +691,18 @@ export default function PropertyDetailPage() {
                   <button type="button" className={styles.pillBtn} onClick={() => handleTabClick('neighbourhood')}>
                     <Compass size={14} />
                     <span>Map</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.pillBtn}
+                    onClick={() => {
+                      const waText = encodeURIComponent(`Hi ProBridge, I would like to receive the official brochure and price sheet for ${p.title} (${shareUrl})`);
+                      window.open(`https://wa.me/919176663200?text=${waText}`, '_blank', 'noopener,noreferrer');
+                    }}
+                    title="Request Brochure on WhatsApp"
+                  >
+                    <MessageCircle size={14} />
+                    <span>Brochure</span>
                   </button>
                 </div>
               </div>
@@ -1888,7 +1901,59 @@ export default function PropertyDetailPage() {
             
 
 
-            {/* ══════════════════════════════════════════════════════════
+                        {/* ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ 
+                SECTION: BROCHURE (WHATSAPP REQUEST)
+            ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═  */}
+            <section id="brochure" className={styles.card}>
+              <h2 className={styles.cardTitle}>Project Brochure</h2>
+              <div className={styles.brochureCard}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <div className={styles.pdfIconWrap} style={{ background: '#ecfdf5', color: '#0D5F4E' }}>
+                    <FileText size={26} color="#0D5F4E" />
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a', fontWeight: 700 }}>
+                      {p.title} Official Brochure
+                    </h3>
+                    <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#64748b' }}>
+                      Request the verified master plan, unit layouts, exact pricing & payment schedule sent directly to your WhatsApp.
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const waText = encodeURIComponent(`Hi ProBridge, I would like to receive the official brochure and price sheet for ${p.title} (${shareUrl})`);
+                      window.open(`https://wa.me/919176663200?text=${waText}`, '_blank', 'noopener,noreferrer');
+                    }}
+                    style={{
+                      background: '#25D366',
+                      color: '#fff',
+                      border: 'none',
+                      padding: '12px 22px',
+                      borderRadius: '8px',
+                      fontWeight: 700,
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 12px rgba(37,211,102,0.25)'
+                    }}
+                  >
+                    <MessageCircle size={18} />
+                    <span>Request Brochure on WhatsApp</span>
+                  </button>
+                  <span style={{ fontSize: '12.5px', color: '#0D5F4E', fontWeight: 600 }}>
+                    ⚡ Instant delivery via WhatsApp
+                  </span>
+                </div>
+              </div>
+            </section>
+
+{/* ══════════════════════════════════════════════════════════
                 SECTION 9: ABOUT BUILDER / SELLER
             ══════════════════════════════════════════════════════════ */}
             <section id="builder" className={styles.card}>
