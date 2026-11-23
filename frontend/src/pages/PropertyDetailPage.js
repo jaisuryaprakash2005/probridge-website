@@ -11,7 +11,7 @@ import {
   Armchair, PhoneCall, Baby, Train, Activity, GraduationCap,
   ShoppingBag, Plane, Map, List, Navigation, Info, Plus,
   ChevronDown, ChevronUp, Phone, Check,
-  Camera, Video, Compass, Download, Share2,
+  Camera, Video, Compass, Share2,
   Calculator, FileText, Layers, Building2,
   ExternalLink, MessageCircle, HelpCircle, X,
   ShieldCheck, Film, ChevronRight, Sparkles
@@ -56,7 +56,6 @@ const TABS = [
   { id: 'home-loan', label: 'Home Loan', Icon: Calculator },
   { id: 'payment-plans', label: 'Payment Plans', Icon: FileText },
   { id: 'neighbourhood', label: 'Neighbourhood', Icon: Compass },
-  { id: 'brochure', label: 'Brochure', Icon: Download },
   { id: 'builder', label: 'Builder', Icon: Building2 },
   { id: 'faq', label: 'FAQ', Icon: HelpCircle },
 ];
@@ -691,21 +690,6 @@ export default function PropertyDetailPage() {
                   <button type="button" className={styles.pillBtn} onClick={() => handleTabClick('neighbourhood')}>
                     <Compass size={14} />
                     <span>Map</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.pillBtn}
-                    onClick={() => {
-                      if (p.propertyBrochure) {
-                        window.open(p.propertyBrochure, '_blank', 'noopener,noreferrer');
-                      } else {
-                        const waText = encodeURIComponent(`Hi, I would like to know more about ${p.title} and I want Brochre(${shareUrl})`);
-                        window.open(`https://wa.me/919176663200?text=${waText}`, '_blank', 'noopener,noreferrer');
-                      }
-                    }}
-                  >
-                    <Download size={14} />
-                    <span>{p.propertyBrochure ? 'Brochure' : 'Request Brochure'}</span>
                   </button>
                 </div>
               </div>
@@ -1901,52 +1885,8 @@ export default function PropertyDetailPage() {
               )}
             </section>
 
-            {/* ══════════════════════════════════════════════════════════
-                SECTION 8: BROCHURE (PDF)
-            ══════════════════════════════════════════════════════════ */}
-            <section id="brochure" className={styles.card}>
-              <h2 className={styles.cardTitle}>Property Brochure</h2>
-              <div className={styles.brochureCard}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                  <div className={styles.pdfIconWrap}>
-                    <FileText size={28} color="#dc2626" />
-                  </div>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a', fontWeight: 700 }}>
-                      {p.title} Official Brochure
-                    </h3>
-                    <p style={{ margin: '3px 0 0', fontSize: '13px', color: '#64748b' }}>
-                      {p.propertyBrochure ? 'Verified project brochure document (PDF)' : 'Brochure document available upon enquiry'}
-                    </p>
-                  </div>
-                </div>
+            
 
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-                  {p.propertyBrochure && (
-                    <a
-                      href={p.propertyBrochure}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.downloadBrochureBtn}
-                    >
-                      <Download size={15} /> Download Brochure
-                    </a>
-                  )}
-
-                  <button
-                    type="button"
-                    className={styles.whatsappBrochureBtn}
-                    onClick={() => {
-                      const waText = encodeURIComponent(`Hi, I would like to know more about ${p.title} (${shareUrl})`);
-                      window.open(`https://wa.me/919176663200?text=${waText}`, '_blank', 'noopener,noreferrer');
-                    }}
-                  >
-                    <MessageCircle size={16} />
-                    <span>Request Brochure</span>
-                  </button>
-                </div>
-              </div>
-            </section>
 
             {/* ══════════════════════════════════════════════════════════
                 SECTION 9: ABOUT BUILDER / SELLER
