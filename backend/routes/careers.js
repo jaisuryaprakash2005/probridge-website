@@ -100,6 +100,7 @@ const INITIAL_CAREERS = [
     type: 'Full-time',
     experience: '2-5 years',
     salary: '₹6L - ₹12L PA + Incentives',
+    image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80',
     description: 'Lead high-value property advisory, organize client site visits, and negotiate premium residential deals.',
     requirements: ['2+ years real estate sales', 'Strong communication skills', 'Knowledge of Chennai/Bengaluru market'],
     status: 'active',
@@ -111,6 +112,7 @@ const INITIAL_CAREERS = [
     type: 'Full-time',
     experience: '2-4 years',
     salary: '₹8L - ₹16L PA',
+    image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80',
     description: 'Build fast, accessible, responsive web and mobile interfaces for millions of Indian homebuyers.',
     requirements: ['Strong React.js and CSS', 'Experience with REST APIs', 'Attention to UI/UX detail'],
     status: 'active',
@@ -122,6 +124,7 @@ const INITIAL_CAREERS = [
     type: 'Full-time',
     experience: '1-3 years',
     salary: '₹4L - ₹7L PA',
+    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80',
     description: 'Conduct on-ground property inspections, legal document vetting, and builder site verifications.',
     requirements: ['Field operations experience', 'Basic legal knowledge of property deeds', 'Valid two-wheeler license'],
     status: 'active',
@@ -133,6 +136,7 @@ const INITIAL_CAREERS = [
     type: 'Full-time',
     experience: '3-6 years',
     salary: '₹10L - ₹18L PA',
+    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
     description: 'Drive organic & paid acquisition, manage social campaigns, and grow ProBridge brand awareness.',
     requirements: ['Proven digital marketing track record', 'SEO/SEM and Meta Ads expertise', 'Data-driven mindset'],
     status: 'active',
@@ -196,6 +200,7 @@ router.post('/admin', async (req, res) => {
       type,
       experience,
       salary,
+      image,
       description,
       requirements,
       openings,
@@ -223,6 +228,7 @@ router.post('/admin', async (req, res) => {
       type: (type || 'Full-time').trim(),
       experience: (experience || '1-3 years').trim(),
       salary: (salary || 'Competitive').trim(),
+      image: (image || '').trim(),
       description: (description || '').trim(),
       requirements: parsedReqs,
       openings: openings ? Number(openings) : 1,
@@ -247,7 +253,7 @@ router.patch('/admin/:id', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid career ID' });
     }
     const updates = {};
-    const { title, department, location, type, experience, salary, description, requirements, openings, status } = req.body || {};
+    const { title, department, location, type, experience, salary, image, description, requirements, openings, status } = req.body || {};
 
     if (title !== undefined) updates.title = title.trim();
     if (department !== undefined) updates.department = department.trim();
@@ -255,6 +261,7 @@ router.patch('/admin/:id', async (req, res) => {
     if (type !== undefined) updates.type = type.trim();
     if (experience !== undefined) updates.experience = experience.trim();
     if (salary !== undefined) updates.salary = salary.trim();
+    if (image !== undefined) updates.image = (image || '').trim();
     if (description !== undefined) updates.description = description.trim();
     if (openings !== undefined) updates.openings = Number(openings);
     if (status !== undefined) updates.status = status;

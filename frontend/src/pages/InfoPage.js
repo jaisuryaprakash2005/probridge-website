@@ -204,10 +204,42 @@ function AboutUsView() {
 ══════════════════════════════════════════════════════════════════ */
 function CareersView() {
   const DEFAULT_ROLES = [
-    { title: 'Real Estate Portfolio Advisor', dept: 'Advisory & Sales', loc: 'Chennai & Bengaluru', type: 'Full-time', experience: '2-5 years', salary: '₹6L - ₹12L PA' },
-    { title: 'Frontend React / React Native Engineer', dept: 'Technology & Product', loc: 'Remote / Hybrid', type: 'Full-time', experience: '2-4 years', salary: '₹8L - ₹16L PA' },
-    { title: 'Property Verification Specialist', dept: 'Field Operations', loc: 'Chennai', type: 'Full-time', experience: '1-3 years', salary: '₹4L - ₹7L PA' },
-    { title: 'Digital Growth Marketing Manager', dept: 'Marketing', loc: 'Bengaluru', type: 'Full-time', experience: '3-6 years', salary: '₹10L - ₹18L PA' },
+    {
+      title: 'Real Estate Portfolio Advisor',
+      dept: 'Advisory & Sales',
+      loc: 'Chennai & Bengaluru',
+      type: 'Full-time',
+      experience: '2-5 years',
+      salary: '₹6L - ₹12L PA',
+      image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80',
+    },
+    {
+      title: 'Frontend React / React Native Engineer',
+      dept: 'Technology & Product',
+      loc: 'Remote / Hybrid',
+      type: 'Full-time',
+      experience: '2-4 years',
+      salary: '₹8L - ₹16L PA',
+      image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80',
+    },
+    {
+      title: 'Property Verification Specialist',
+      dept: 'Field Operations',
+      loc: 'Chennai',
+      type: 'Full-time',
+      experience: '1-3 years',
+      salary: '₹4L - ₹7L PA',
+      image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80',
+    },
+    {
+      title: 'Digital Growth Marketing Manager',
+      dept: 'Marketing',
+      loc: 'Bengaluru',
+      type: 'Full-time',
+      experience: '3-6 years',
+      salary: '₹10L - ₹18L PA',
+      image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
+    },
   ];
 
   const [careersList, setCareersList] = useState(DEFAULT_ROLES);
@@ -348,7 +380,26 @@ function CareersView() {
               return (
                 <div key={role.id || role._id || role.title + i} className={styles.roleCard}>
                   <div className={styles.roleLeft}>
-                    <div className={styles.roleIconWrap}><Briefcase size={20} /></div>
+                    <div className={styles.roleIconWrap}>
+                      {role.image ? (
+                        <img
+                          src={role.image}
+                          alt={role.title}
+                          className={styles.roleImg}
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            const fallback = e.currentTarget.parentElement?.querySelector(`.${styles.roleFallbackIcon}`);
+                            if (fallback) fallback.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div
+                        className={styles.roleFallbackIcon}
+                        style={{ display: role.image ? 'none' : 'flex' }}
+                      >
+                        <Briefcase size={20} />
+                      </div>
+                    </div>
                     <div>
                       <h3 className={styles.roleTitle}>{role.title}</h3>
                       <p className={styles.roleMeta}>
@@ -669,9 +720,9 @@ function PropGuideView() {
       <div className={styles.fullHero} style={{ backgroundImage: `url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1600&q=80')` }}>
         <div className={styles.heroOverlay} />
         <div className={styles.heroContent}>
-          <Breadcrumb label="PropGuide" />
+          <Breadcrumb label="Bridge Guide" />
           <span className={styles.heroTag}>Real Estate Knowledge Hub</span>
-          <h1 className={styles.heroTitle}>PropGuide by ProBridge</h1>
+          <h1 className={styles.heroTitle}>Bridgeguide by ProBridge</h1>
           <p className={styles.heroSub}>Expert guides, legal insights, taxation tips, and market analysis to help you make confident real estate investment decisions.</p>
         </div>
       </div>
