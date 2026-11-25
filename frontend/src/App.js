@@ -46,6 +46,10 @@ function App() {
                 <Route path="/careers"            element={<InfoPage page="careers" />} />
                 <Route path="/contact-us"         element={<InfoPage page="contact-us" />} />
                 <Route path="/privacy"            element={<InfoPage page="privacy" />} />
+                <Route path="/blogs"              element={<InfoPage page="blogs" />} />
+                <Route path="/blogs/:id"          element={<InfoPage page="blogs" />} />
+                <Route path="/blog/:id"           element={<InfoPage page="blogs" />} />
+                <Route path="/bridgeguide"        element={<InfoPage page="blogs" />} />
                 <Route path="/guide"              element={<InfoPage page="guide" />} />
                 <Route path="/nri-services"       element={<InfoPage page="nri-services" />} />
                 <Route path="/how-to-buy"         element={<InfoPage page="how-to-buy" />} />

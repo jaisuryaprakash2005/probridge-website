@@ -48,16 +48,48 @@ router.post('/', optionalAuth, async (req, res) => {
       });
     }
 
-    const property = await findProperty(propertyId);
-    const propTitle = property?.title || req.body.propertyTitle || 'Property Listing';
-    const propImg = (property?.images && property.images[0]) || property?.image || req.body.propertyImage || '';
-    const propIdStr = property ? property._id.toString() : String(propertyId || '');
+    const isContactUs = Boolean(req.body.isContactUs) ||
+      req.body.source === 'contact_us' ||
+      req.body.requestType === 'contact_us' ||
+      req.body.type === 'contact_us' ||
+      !propertyId;
 
-    const isCallback = Boolean(req.body.isCallback) || (
+    // Strict limit: One account / user can only submit Contact Us once
+    if (isContactUs) {
+      const orClauses = [];
+      if (req.user?._id) orClauses.push({ sender: req.user._id });
+      if (finalPhone) orClauses.push({ senderPhone: finalPhone });
+      if (finalEmail) orClauses.push({ senderEmail: finalEmail });
+
+      if (orClauses.length > 0) {
+        const existing = await Enquiry.findOne({
+          isContactUs: true,
+          $or: orClauses,
+        }).catch(() => null);
+
+        if (existing) {
+          return res.status(200).json({
+            success: true,
+            alreadySubmitted: true,
+            message: 'You have already submitted an inquiry to ProBridge. Our team will contact you shortly.',
+            enquiry: existing,
+          });
+        }
+      }
+    }
+
+    const property = await findProperty(propertyId);
+    const propTitle = isContactUs
+      ? 'Contact Us Submission'
+      : (property?.title || req.body.propertyTitle || 'Property Listing');
+    const propImg = (property?.images && property.images[0]) || property?.image || req.body.propertyImage || '';
+    const propIdStr = property ? property._id.toString() : (isContactUs ? '' : String(propertyId || ''));
+
+    const isCallback = !isContactUs && (Boolean(req.body.isCallback) || (
       typeof finalMessage === 'string' && (
         finalMessage.toLowerCase().includes('callback') || finalMessage.toLowerCase().startsWith('request callback')
       )
-    );
+    ));
 
     // 1. Save to Notifications collection so Admin Dashboard Leads page displays it immediately
     const notifData = {
@@ -71,9 +103,16 @@ router.post('/', optionalAuth, async (req, res) => {
       propertyId: propIdStr,
       propertyTitle: propTitle,
       propertyImage: propImg,
-      type: 'enquiry',
+      type: isContactUs ? 'contact_us' : (isCallback ? 'callback' : 'enquiry'),
+      requestType: isContactUs ? 'contact_us' : (isCallback ? 'callback' : 'enquiry'),
+      isContactUs: isContactUs,
+      source: isContactUs ? 'contact_us' : 'website',
       status: 'New',
-      title: isCallback ? `Callback Request: ${propTitle}` : `New Enquiry: ${propTitle}`,
+      title: isContactUs
+        ? `Contact Us Message from ${finalName}`
+        : (isCallback ? `Callback Request: ${propTitle}` : `New Enquiry: ${propTitle}`),
+      subject: req.body.subject || (isContactUs ? 'Website Contact Inquiry' : ''),
+      contactUsSubject: req.body.contactUsSubject || req.body.subject || (isContactUs ? 'Website Contact Inquiry' : ''),
       message: finalMessage,
       read: false,
       createdAt: new Date(),
@@ -94,18 +133,26 @@ router.post('/', optionalAuth, async (req, res) => {
       // silent fallback
     }
 
-    // 2. Also save to Enquiry collection if valid ObjectId
+    // 2. Also save to Enquiry collection
     let savedEnquiry = null;
-    if (property && mongoose.Types.ObjectId.isValid(property._id)) {
+    try {
       savedEnquiry = await Enquiry.create({
-        property: property._id,
+        property: property && mongoose.Types.ObjectId.isValid(property._id) ? property._id : null,
         propertyTitle: propTitle,
         sender: req.user?._id || null,
         senderName: finalName,
         senderEmail: finalEmail,
         senderPhone: finalPhone,
         message: finalMessage,
-      }).catch(() => null);
+        type: isContactUs ? 'contact_us' : 'enquiry',
+        requestType: isContactUs ? 'contact_us' : 'enquiry',
+        isContactUs: isContactUs,
+        source: isContactUs ? 'contact_us' : 'website',
+        subject: req.body.subject || (isContactUs ? 'Website Contact Inquiry' : ''),
+        contactUsSubject: req.body.contactUsSubject || req.body.subject || (isContactUs ? 'Website Contact Inquiry' : ''),
+      });
+    } catch (enqErr) {
+      console.warn('[Enquiry Save Warning]', enqErr.message);
     }
 
     res.status(201).json({
@@ -116,6 +163,36 @@ router.post('/', optionalAuth, async (req, res) => {
   } catch (err) {
     console.error('[Enquiry Route Error]', err);
     res.status(500).json({ success: false, message: err.message || 'Failed to submit enquiry' });
+  }
+});
+
+// GET /api/enquiries/contact-status — check if user/account has already submitted Contact Us
+router.get('/contact-status', optionalAuth, async (req, res) => {
+  try {
+    const { phone, email } = req.query;
+    const orClauses = [];
+    if (req.user?._id) orClauses.push({ sender: req.user._id });
+    if (req.user?.phone) orClauses.push({ senderPhone: req.user.phone });
+    if (req.user?.email) orClauses.push({ senderEmail: req.user.email });
+    if (phone) orClauses.push({ senderPhone: String(phone).trim() });
+    if (email) orClauses.push({ senderEmail: String(email).trim() });
+
+    if (orClauses.length === 0) {
+      return res.json({ success: true, submitted: false });
+    }
+
+    const existing = await Enquiry.findOne({
+      isContactUs: true,
+      $or: orClauses,
+    }).catch(() => null);
+
+    return res.json({
+      success: true,
+      submitted: Boolean(existing),
+      enquiry: existing || null,
+    });
+  } catch (err) {
+    return res.json({ success: true, submitted: false });
   }
 });
 

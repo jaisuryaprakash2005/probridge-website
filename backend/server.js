@@ -14,6 +14,9 @@ const adRoutes         = require('./routes/ads');
 const careerRoutes     = require('./routes/careers');
 const topBannerRoutes  = require('./routes/topBanners');
 const builderRoutes    = require('./routes/builders');
+const youtubeLinkRoutes = require('./routes/youtubeLinks');
+const blogRoutes       = require('./routes/blogs');
+const bridgeGuideRoutes = require('./routes/bridgeGuides');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -58,8 +61,11 @@ app.use('/api/upload',      uploadRoutes);
 app.use('/api/enquiries',   enquiryRoutes);
 app.use('/api/ads',         adRoutes);
 app.use('/api/careers',     careerRoutes);
-app.use('/api/top-banners', topBannerRoutes);
-app.use('/api/builders',    builderRoutes);
+app.use('/api/top-banners',   topBannerRoutes);
+app.use('/api/builders',      builderRoutes);
+app.use('/api/youtube-links', youtubeLinkRoutes);
+app.use('/api/blogs',         blogRoutes);
+app.use('/api/bridge-guides', bridgeGuideRoutes);
 
 // ─── 404 ──────────────────────────────────────────────────────────────────
 app.use((req, res) => {

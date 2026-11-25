@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   Building2, PhoneCall, ShieldCheck,
   ChevronRight, MapPin, Mail, Clock,
   CheckCircle2, Award, Sparkles, Send,
   Users, TrendingUp, Globe, Heart,
-  Briefcase, X, Upload, Star
+  X, Upload, Star, Calendar,
+  ExternalLink, BookOpen, FileText, Download,
+  Eye, User as UserIcon, ArrowLeft, Share2, Check
 } from 'lucide-react';
 import styles from './InfoPage.module.css';
-import { getCareers, applyForCareer } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { getCareers, applyForCareer, getBlogs, getBlogById, sendEnquiry, getContactStatus, getBridgeGuides } from '../services/api';
 
 /* ─€─€ Scroll Reveal Hook ─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€ */
 function useScrollReveal() {
@@ -36,6 +39,7 @@ function useScrollReveal() {
 /* ─€─€ Main Page ─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€ */
 export default function InfoPage({ page }) {
   const location = useLocation();
+  const params = useParams();
   const pathSlug = location.pathname.replace(/^\//, '');
   const currentSlug = pathSlug || page || 'about-us';
 
@@ -45,30 +49,191 @@ export default function InfoPage({ page }) {
 
   useScrollReveal();
 
+  const { user, openLoginModal } = useAuth();
+
+  const [submissionInfo, setSubmissionInfo] = useState(null);
   const [contactSubmitted, setContactSubmitted] = useState(false);
+  const [contactSubmitting, setContactSubmitting] = useState(false);
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', message: '' });
 
-  const handleContactSubmit = (e) => {
+  // Whenever account changes or user logs out, refresh "Send Us a Message" field
+  useEffect(() => {
+    if (!user) {
+      setContactSubmitted(false);
+      setSubmissionInfo(null);
+      setFormData({ name: '', phone: '', email: '', message: '' });
+      return;
+    }
+
+    setFormData({
+      name: user.name || '',
+      phone: user.phone || '',
+      email: user.email || '',
+      message: '',
+    });
+
+    const userKey = user._id || user.id;
+    const phoneKey = user.phone;
+    const emailKey = user.email;
+
+    let locallySubmitted = false;
+    let savedData = null;
+
+    if (userKey && localStorage.getItem(`pb_contact_submitted_${userKey}`) === 'true') {
+      locallySubmitted = true;
+      try { savedData = JSON.parse(localStorage.getItem(`pb_contact_sub_data_${userKey}`)); } catch (_) {}
+    } else if (phoneKey && localStorage.getItem(`pb_contact_submitted_${phoneKey}`) === 'true') {
+      locallySubmitted = true;
+      try { savedData = JSON.parse(localStorage.getItem(`pb_contact_sub_data_${phoneKey}`)); } catch (_) {}
+    } else if (emailKey && localStorage.getItem(`pb_contact_submitted_${emailKey}`) === 'true') {
+      locallySubmitted = true;
+      try { savedData = JSON.parse(localStorage.getItem(`pb_contact_sub_data_${emailKey}`)); } catch (_) {}
+    }
+
+    if (locallySubmitted) {
+      setContactSubmitted(true);
+      if (savedData) setSubmissionInfo(savedData);
+    } else {
+      setContactSubmitted(false);
+      setSubmissionInfo(null);
+      getContactStatus({ phone: user.phone, email: user.email })
+        .then((res) => {
+          if (res.data?.submitted) {
+            setContactSubmitted(true);
+            if (userKey) localStorage.setItem(`pb_contact_submitted_${userKey}`, 'true');
+            if (phoneKey) localStorage.setItem(`pb_contact_submitted_${phoneKey}`, 'true');
+            if (emailKey) localStorage.setItem(`pb_contact_submitted_${emailKey}`, 'true');
+            if (res.data?.enquiry) {
+              const enq = res.data.enquiry;
+              const rec = {
+                name: enq.senderName || user.name,
+                phone: enq.senderPhone || user.phone,
+                email: enq.senderEmail || user.email,
+                date: new Date(enq.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+              };
+              setSubmissionInfo(rec);
+              if (userKey) localStorage.setItem(`pb_contact_sub_data_${userKey}`, JSON.stringify(rec));
+              else if (phoneKey) localStorage.setItem(`pb_contact_sub_data_${phoneKey}`, JSON.stringify(rec));
+            }
+          }
+        })
+        .catch(() => { });
+    }
+  }, [user]);
+
+  const handleContactSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.phone) return;
-    setContactSubmitted(true);
+    if (!user) {
+      openLoginModal();
+      return;
+    }
+    if (!formData.name?.trim() || !formData.phone?.trim()) return;
+    setContactSubmitting(true);
+
+    const trimmedName = formData.name.trim();
+    const trimmedPhone = formData.phone.trim();
+    const trimmedEmail = (formData.email || '').trim();
+    const trimmedMessage = formData.message?.trim() || 'General inquiry submitted from Contact Us page';
+
+    const payload = {
+      name: trimmedName,
+      senderName: trimmedName,
+      phone: trimmedPhone,
+      senderPhone: trimmedPhone,
+      email: trimmedEmail,
+      senderEmail: trimmedEmail,
+      message: trimmedMessage,
+      isContactUs: true,
+      source: 'contact_us',
+      requestType: 'contact_us',
+      type: 'contact_us',
+      propertyTitle: 'Contact Us Submission',
+      title: `Contact Us Message from ${trimmedName}`,
+      subject: 'Website Contact Inquiry',
+      contactUsSubject: 'Website Contact Inquiry',
+    };
+
+    try {
+      await sendEnquiry(payload);
+
+      const userKey = user._id || user.id;
+      const phoneKey = trimmedPhone;
+      const emailKey = trimmedEmail;
+
+      if (userKey) localStorage.setItem(`pb_contact_submitted_${userKey}`, 'true');
+      if (phoneKey) localStorage.setItem(`pb_contact_submitted_${phoneKey}`, 'true');
+      if (emailKey) localStorage.setItem(`pb_contact_submitted_${emailKey}`, 'true');
+
+      const subRecord = {
+        name: trimmedName,
+        phone: trimmedPhone,
+        email: trimmedEmail,
+        message: trimmedMessage,
+        date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+      };
+      if (userKey) localStorage.setItem(`pb_contact_sub_data_${userKey}`, JSON.stringify(subRecord));
+      else if (phoneKey) localStorage.setItem(`pb_contact_sub_data_${phoneKey}`, JSON.stringify(subRecord));
+      setSubmissionInfo(subRecord);
+
+      // Also persist to localStorage so Admin Dashboard demo/local state picks it up
+      try {
+        const stored = localStorage.getItem('probridge_store_leads');
+        const list = stored ? JSON.parse(stored) : [];
+        list.unshift({
+          _id: 'lead-contact-' + Date.now(),
+          id: 'lead-contact-' + Date.now(),
+          senderName: payload.name,
+          senderPhone: payload.phone,
+          senderEmail: payload.email,
+          message: payload.message,
+          propertyTitle: 'Contact Us Submission',
+          type: 'contact_us',
+          requestType: 'contact_us',
+          isContactUs: true,
+          source: 'contact_us',
+          status: 'New',
+          subject: 'Website Contact Inquiry',
+          contactUsSubject: 'Website Contact Inquiry',
+          createdAt: new Date().toISOString(),
+        });
+        localStorage.setItem('probridge_store_leads', JSON.stringify(list));
+      } catch (_) { }
+
+      setContactSubmitted(true);
+    } catch (err) {
+      console.warn('[ContactUs] submission warning:', err);
+      setContactSubmitted(true);
+    } finally {
+      setContactSubmitting(false);
+    }
   };
 
   return (
     <div className={styles.pageWrap}>
       {renderPageContent(currentSlug, {
-        formData, setFormData, contactSubmitted, handleContactSubmit,
-      })}
+        formData, setFormData, contactSubmitted, contactSubmitting, submissionInfo, handleContactSubmit,
+      }, params)}
     </div>
   );
 }
 
-function renderPageContent(slug, contactState) {
-  switch (slug) {
+function renderPageContent(slug, contactState, params) {
+  const parts = slug.split('/').filter(Boolean);
+  const root = parts[0] || 'about-us';
+  const detailId = params?.id || (parts.length > 1 ? parts[1] : null);
+
+  if (root === 'blogs' || root === 'blog') {
+    if (detailId) {
+      return <BlogDetailView blogId={detailId} />;
+    }
+    return <BlogsView />;
+  }
+  switch (root) {
     case 'about-us': return <AboutUsView />;
     case 'careers': return <CareersView />;
     case 'contact-us': return <ContactUsView {...contactState} />;
     case 'privacy': return <PrivacyPolicyView />;
+    case 'bridgeguide':
     case 'guide': return <PropGuideView />;
     case 'nri-services': return <NriServicesView />;
     case 'how-to-buy': return <HowToBuyView />;
@@ -77,6 +242,7 @@ function renderPageContent(slug, contactState) {
 }
 
 /* ─€─€ Breadcrumb helper ─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€ */
+// eslint-disable-next-line no-unused-vars
 function Breadcrumb({ label }) {
   return (
     <div className={styles.breadcrumbBar}>
@@ -102,7 +268,7 @@ function AboutUsView() {
       >
         <div className={styles.heroOverlay} />
         <div className={styles.heroContent}>
-          <Breadcrumb label="About Us" />
+          {/* <Breadcrumb label="About Us" /> */}
           <span className={styles.heroTag}>Corporate Overview</span>
           <h1 className={styles.heroTitle}>About ProBridge</h1>
           <p className={styles.heroSub}>
@@ -203,6 +369,26 @@ function AboutUsView() {
    2. CAREERS (CONNECTED TO BACKEND API & ADMIN DASHBOARD)
 ══════════════════════════════════════════════════════════════════ */
 function CareersView() {
+  const getCareerImage = (role) => {
+    if (role?.image && typeof role.image === 'string' && role.image.trim()) {
+      return role.image;
+    }
+    const text = `${role?.title || ''} ${role?.department || role?.dept || ''}`.toLowerCase();
+    if (text.includes('react') || text.includes('engineer') || text.includes('tech') || text.includes('frontend') || text.includes('developer')) {
+      return 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80';
+    }
+    if (text.includes('marketing') || text.includes('growth') || text.includes('social') || text.includes('brand')) {
+      return 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80';
+    }
+    if (text.includes('verif') || text.includes('field') || text.includes('inspect') || text.includes('site')) {
+      return 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80';
+    }
+    if (text.includes('advisor') || text.includes('sales') || text.includes('portfolio') || text.includes('consultant')) {
+      return 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80';
+    }
+    return 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80';
+  };
+
   const DEFAULT_ROLES = [
     {
       title: 'Real Estate Portfolio Advisor',
@@ -242,8 +428,8 @@ function CareersView() {
     },
   ];
 
-  const [careersList, setCareersList] = useState(DEFAULT_ROLES);
-  const [, setLoadingCareers] = useState(false);
+  const [careersList, setCareersList] = useState([]);
+  const [, setLoadingCareers] = useState(true);
 
   const [showModal, setShowModal] = useState(false);
   const [selectedRole, setSelectedRole] = useState(null);
@@ -260,17 +446,21 @@ function CareersView() {
     getCareers()
       .then((res) => {
         const results = res.data?.results || [];
-        if (active && results.length > 0) {
+        if (active) {
+          // Connected with database: show ONLY database value
           setCareersList(results);
         }
       })
       .catch((err) => {
-        console.warn('Could not load live careers, showing default listings:', err.message);
+        console.warn('Could not connect to database, showing dummy career listings:', err.message);
+        // Disconnected from database: fallback to dummy data
+        if (active) setCareersList(DEFAULT_ROLES);
       })
       .finally(() => {
         if (active) setLoadingCareers(false);
       });
     return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const openModal = (role) => {
@@ -328,7 +518,7 @@ function CareersView() {
       >
         <div className={styles.heroOverlay} />
         <div className={styles.heroContent}>
-          <Breadcrumb label="Careers" />
+          {/* <Breadcrumb label="Careers" /> */}
           <span className={styles.heroTag}>Join Our Team</span>
           <h1 className={styles.heroTitle}>Careers at ProBridge</h1>
           <p className={styles.heroSub}>
@@ -381,24 +571,15 @@ function CareersView() {
                 <div key={role.id || role._id || role.title + i} className={styles.roleCard}>
                   <div className={styles.roleLeft}>
                     <div className={styles.roleIconWrap}>
-                      {role.image ? (
-                        <img
-                          src={role.image}
-                          alt={role.title}
-                          className={styles.roleImg}
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                            const fallback = e.currentTarget.parentElement?.querySelector(`.${styles.roleFallbackIcon}`);
-                            if (fallback) fallback.style.display = 'flex';
-                          }}
-                        />
-                      ) : null}
-                      <div
-                        className={styles.roleFallbackIcon}
-                        style={{ display: role.image ? 'none' : 'flex' }}
-                      >
-                        <Briefcase size={20} />
-                      </div>
+                      <img
+                        src={getCareerImage(role)}
+                        alt={role.title}
+                        className={styles.roleImg}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80';
+                        }}
+                      />
                     </div>
                     <div>
                       <h3 className={styles.roleTitle}>{role.title}</h3>
@@ -559,7 +740,7 @@ function CareersView() {
 /* ═══════════════════════════════════════════════════════════════
    3. CONTACT US
 ═══════════════════════════════════════════════════════════════ */
-function ContactUsView({ formData, setFormData, contactSubmitted, handleContactSubmit }) {
+function ContactUsView({ formData, setFormData, contactSubmitted, contactSubmitting, submissionInfo, handleContactSubmit }) {
   return (
     <>
       <div
@@ -568,7 +749,7 @@ function ContactUsView({ formData, setFormData, contactSubmitted, handleContactS
       >
         <div className={styles.heroOverlay} />
         <div className={styles.heroContent}>
-          <Breadcrumb label="Contact Us" />
+          {/* <Breadcrumb label="Contact Us" /> */}
           <span className={styles.heroTag}>Get in Touch</span>
           <h1 className={styles.heroTitle}>Contact ProBridge</h1>
           <p className={styles.heroSub}>
@@ -582,7 +763,7 @@ function ContactUsView({ formData, setFormData, contactSubmitted, handleContactS
         <div className={styles.sectionInner}>
           <div className={styles.contactGrid} data-reveal data-delay="0">
             {[
-              { icon: <MapPin size={22} />, label: 'Corporate Office', val: 'First Floor, i5 Complex, 10-B, Ekambaram Industrial Estate Rd, Alapakkam, Karpaga Vinayagar Colony, Valasaravakkam, Chennai, Tamil Nadu 600116' },
+              { icon: <MapPin size={22} />, label: 'Corporate Office', val: '314,IT Plaza - Nadd Hessa,Dubai Silicon Oasis,Dubai' },
               { icon: <PhoneCall size={22} />, label: 'Phone & WhatsApp', val: '+91 9176663200' },
               { icon: <Mail size={22} />, label: 'Support Email', val: 'info@probridge.co.in' },
               { icon: <Clock size={22} />, label: 'Advisory Desk Hours', val: 'Monday to Saturday: 9:30 AM – 6:30 PM' },
@@ -605,28 +786,96 @@ function ContactUsView({ formData, setFormData, contactSubmitted, handleContactS
           <div className={styles.contactSplitRow}>
             {/* Map */}
             <div className={styles.mapWrap} data-reveal data-delay="0">
-              <h2 className={styles.sectionTitle}>Find Us</h2>
+              <div className={styles.mapHeaderRow}>
+                <div>
+                  <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Find Us</h2>
+                  <p style={{ margin: '4px 0 0', color: '#6D857C', fontSize: 13 }}>
+                    ProBridge Corporate Headquarters
+                  </p>
+                </div>
+                <a
+                  href="https://www.google.com/maps/search/?api=1&query=314,+IT+Plaza+-+Nadd+Hessa,+Dubai+Silicon+Oasis,+Dubai"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.openMapBtn}
+                  title="Open location in Google Maps"
+                >
+                  <MapPin size={16} />
+                  <span>Open Map</span>
+                  <ExternalLink size={13} style={{ marginLeft: 2, opacity: 0.85 }} />
+                </a>
+              </div>
               <iframe
-                title="ProBridge Office Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3507.6753967854836!2d77.0405!3d28.4564!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d18f2b9b5b10b%3A0x0!2zMjjCsDI3JzIzLjAiTiA3N8KwMDInMjkuNCJF!5e0!3m2!1sen!2sin!4v1234567890123"
+                title="ProBridge Office Location - 314, IT Plaza, Dubai Silicon Oasis, Dubai"
+                src="https://maps.google.com/maps?q=314,%20IT%20Plaza%20-%20Nadd%20Hessa,%20Dubai%20Silicon%20Oasis,%20Dubai&t=&z=16&ie=UTF8&iwloc=&output=embed"
                 className={styles.mapIframe}
                 allowFullScreen=""
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
               />
+              <div className={styles.mapAddressBanner}>
+                <MapPin size={16} color="#0D5F4E" style={{ flexShrink: 0 }} />
+                <span>314, IT Plaza - Nadd Hessa, Dubai Silicon Oasis, Dubai</span>
+              </div>
             </div>
 
             {/* Contact Form */}
             <div className={styles.formWrap} data-reveal data-delay="100">
               <h2 className={styles.sectionTitle}>Send Us a Message</h2>
               {contactSubmitted ? (
-                <div className={styles.callout} style={{ background: '#E6F4EA', borderColor: '#16a34a' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 15 }}>
-                    <CheckCircle2 size={18} color="#16a34a" /> Thank You! We've Received Your Message
+                <div className={styles.submittedCard}>
+                  <div className={styles.submittedHeader}>
+                    <div className={styles.submittedIconWrap}>
+                      <CheckCircle2 size={26} color="#0D5F4E" />
+                    </div>
+                    <div>
+                      <div className={styles.submittedBadge}>Request Already Registered</div>
+                      <h3 className={styles.submittedTitle}>Inquiry Already Submitted</h3>
+                    </div>
                   </div>
-                  <p style={{ margin: '6px 0 0', color: '#166534' }}>
-                    One of our senior property advisors will get in touch with you at <strong>{formData.phone}</strong> shortly.
+
+                  <p className={styles.submittedDesc}>
+                    Thank you, <strong>{submissionInfo?.name || formData.name || 'valued customer'}</strong>! Your inquiry has already been received and logged in our system. Each account is limited to one active inquiry at a time.
                   </p>
+
+                  <div className={styles.submittedDetailsBox}>
+                    <div className={styles.submittedDetailRow}>
+                      <span className={styles.submittedLabel}>Contact Name:</span>
+                      <span className={styles.submittedVal}>{submissionInfo?.name || formData.name || 'Valued Client'}</span>
+                    </div>
+                    <div className={styles.submittedDetailRow}>
+                      <span className={styles.submittedLabel}>Phone Number:</span>
+                      <span className={styles.submittedVal}>{submissionInfo?.phone || formData.phone || '+91 9176663200'}</span>
+                    </div>
+                    {(submissionInfo?.email || formData.email) && (
+                      <div className={styles.submittedDetailRow}>
+                        <span className={styles.submittedLabel}>Email:</span>
+                        <span className={styles.submittedVal}>{submissionInfo?.email || formData.email}</span>
+                      </div>
+                    )}
+                    {submissionInfo?.date && (
+                      <div className={styles.submittedDetailRow}>
+                        <span className={styles.submittedLabel}>Date Submitted:</span>
+                        <span className={styles.submittedVal}>{submissionInfo.date}</span>
+                      </div>
+                    )}
+                    <div className={styles.submittedDetailRow}>
+                      <span className={styles.submittedLabel}>Account Limit:</span>
+                      <span className={styles.submittedVal}>1 submission per account (Completed)</span>
+                    </div>
+                    <div className={styles.submittedDetailRow}>
+                      <span className={styles.submittedLabel}>Status:</span>
+                      <span className={styles.submittedStatusBadge}>Assigned to Senior Advisor</span>
+                    </div>
+                  </div>
+
+                  <div className={styles.submittedNoteBox}>
+                    <p style={{ margin: 0, fontSize: 13, color: '#166534', lineHeight: 1.5 }}>
+                      📞 <strong>Need immediate assistance?</strong> Since your inquiry is already registered, you can also speak directly with our senior advisory desk at{' '}
+                      <a href="tel:+919176663200" style={{ color: '#0D5F4E', fontWeight: 700 }}>+91 9176663200</a>{' '}
+                      or email <a href="mailto:info@probridge.co.in" style={{ color: '#0D5F4E', fontWeight: 700 }}>info@probridge.co.in</a>.
+                    </p>
+                  </div>
                 </div>
               ) : (
                 <form onSubmit={handleContactSubmit} className={styles.contactForm}>
@@ -656,9 +905,9 @@ function ContactUsView({ formData, setFormData, contactSubmitted, handleContactS
                       value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       className={styles.inputField} style={{ resize: 'vertical' }} />
                   </div>
-                  <button type="submit" className={styles.submitBtn}>
+                  <button type="submit" className={styles.submitBtn} disabled={contactSubmitting}>
                     <Send size={15} style={{ verticalAlign: -2, marginRight: 6 }} />
-                    Submit Message
+                    {contactSubmitting ? 'Sending Message...' : 'Submit Message'}
                   </button>
                 </form>
               )}
@@ -682,10 +931,10 @@ function PrivacyPolicyView() {
   ];
   return (
     <>
-      <div className={styles.fullHero} style={{ backgroundImage: `url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1600&q=80')` }}>
+      <div className={styles.fullHero} style={{ backgroundImage: `url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1600&q=80')` }}>
         <div className={styles.heroOverlay} />
         <div className={styles.heroContent}>
-          <Breadcrumb label="Privacy Policy" />
+          {/* <Breadcrumb label="Privacy Policy" /> */}
           <span className={styles.heroTag}>Legal &amp; Privacy</span>
           <h1 className={styles.heroTitle}>Privacy Policy</h1>
           <p className={styles.heroSub}>How ProBridge collects, protects, and handles your personal data in compliance with Indian data protection laws.</p>
@@ -709,45 +958,806 @@ function PrivacyPolicyView() {
 }
 
 function PropGuideView() {
-  const ARTICLES = [
-    { title: 'First-Time Homebuyer Complete Checklist (2026 Edition)', category: 'Buying Guide', readTime: '6 min read', desc: 'Step-by-step guidance from down payments and credit scores to builder verification, legal checks, and registration costs.', img: 'https://images.unsplash.com/photo-1560184897-ae75f418493e?w=600&q=80' },
-    { title: 'Understanding RERA: How Real Estate Regulation Protects You', category: 'Legal & Compliance', readTime: '5 min read', desc: 'Why every project must have an active RERA number, how to check project delivery deadlines, and your rights if possession is delayed.', img: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600&q=80' },
-    { title: 'Carpet Area vs Built-Up Area vs Super Built-Up Area Explained', category: 'Property Specs', readTime: '4 min read', desc: 'Never overpay for loading. Learn the mathematical difference between usable carpet area, balcony spaces, and common amenities.', img: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&q=80' },
-    { title: 'Top Emerging Real Estate Investment Hubs in India', category: 'Investment Trends', readTime: '7 min read', desc: 'Comprehensive analysis of high-growth corridors in Bengaluru, Chennai, Hyderabad, and Pune driven by metro expansions and IT hubs.', img: 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80' },
-  ];
+  const { user, openLoginModal } = useAuth();
+  const [guides, setGuides] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [readingGuide, setReadingGuide] = useState(null);
+
+  const handleReadGuide = (e, guide) => {
+    if (!user) {
+      if (e) e.preventDefault();
+      openLoginModal();
+      return;
+    }
+  };
+
+  const handlePreviewGuide = (guide) => {
+    if (!user) {
+      openLoginModal();
+      return;
+    }
+    setReadingGuide(guide);
+  };
+
+  const handleDownloadPdf = (e) => {
+    if (!user) {
+      if (e) e.preventDefault();
+      openLoginModal();
+      return;
+    }
+  };
+
+  const getSafePdfUrl = (guide, forDownload = false) => {
+    if (!guide) return '#';
+    if (forDownload && guide.downloadUrl) return guide.downloadUrl;
+    if (guide.fileUrl) return forDownload ? `${guide.fileUrl}?download=true` : guide.fileUrl;
+    const raw = guide.pdfUrl || '';
+    if (guide._id || guide.id) {
+      const guideId = guide._id || guide.id;
+      if (raw.includes('res.cloudinary.com') && raw.includes('/raw/upload/') && !raw.includes('/api/cloudinary.com')) {
+        const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+        return `${apiBase}/bridge-guides/file/${guideId}${forDownload ? '?download=true' : ''}`;
+      }
+    }
+    return raw;
+  };
+
+  const CATEGORY_IMAGES = {
+    'Legal & Verification': 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&q=80',
+    'Buyer Handbook': 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80',
+    'Financial Planning': 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&q=80',
+    'NRI Investment': 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80',
+    'Tax & Stamp Duty': 'https://images.unsplash.com/photo-1450133064473-71024230f91b?w=800&q=80',
+    'Home Construction Guide': 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&q=80',
+    'General': 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80',
+  };
+
+  useEffect(() => {
+    getBridgeGuides()
+      .then(({ data }) => {
+        const list = data?.guides || [];
+        setGuides(list);
+      })
+      .catch((err) => {
+        console.error('Failed to load bridge guides:', err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  const categories = ['All', ...Array.from(new Set(guides.map((g) => g.category).filter(Boolean)))];
+
+  const filteredGuides = activeCategory === 'All'
+    ? guides
+    : guides.filter((g) => (g.category || '').toLowerCase() === activeCategory.toLowerCase());
+
   return (
     <>
-      <div className={styles.fullHero} style={{ backgroundImage: `url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1600&q=80')` }}>
+      <div className={styles.fullHero} style={{ backgroundImage: `url('https://images.unsplash.com/photo-1560184897-ae75f418493e?w=1600&q=80')` }}>
         <div className={styles.heroOverlay} />
         <div className={styles.heroContent}>
-          <Breadcrumb label="Bridge Guide" />
+          {/* <Breadcrumb label="Bridge Guide" /> */}
           <span className={styles.heroTag}>Real Estate Knowledge Hub</span>
           <h1 className={styles.heroTitle}>Bridgeguide by ProBridge</h1>
-          <p className={styles.heroSub}>Expert guides, legal insights, taxation tips, and market analysis to help you make confident real estate investment decisions.</p>
+          <p className={styles.heroSub}>Expert guides, legal insights, taxation tips, and downloadable PDF handbooks to help you make confident real estate investment decisions.</p>
         </div>
       </div>
       <div className={styles.section}>
         <div className={styles.sectionInner}>
-          <h2 className={styles.sectionTitle} data-reveal data-delay="0">Featured Real Estate Guides</h2>
-          <div className={styles.articleGrid}>
-            {ARTICLES.map((art, i) => (
-              <div key={art.title} className={styles.articleCard} data-reveal data-delay={i * 80}>
-                <div className={styles.articleImgWrap}>
-                  <img src={art.img} alt={art.title} className={styles.articleImg} />
-                  <div className={styles.articleImgOverlay} />
-                  <span className={styles.articleCat}>{art.category}</span>
-                </div>
-                <div className={styles.articleBody}>
-                  <span className={styles.articleReadTime}>{art.readTime}</span>
-                  <h3 className={styles.articleTitle}>{art.title}</h3>
-                  <p className={styles.articleDesc}>{art.desc}</p>
-                  <button className={styles.readMoreBtn}>Read Guide →</button>
-                </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
+            <div>
+              <h2 className={styles.sectionTitle} style={{ margin: 0 }} data-reveal data-delay="0">
+                Official Bridge Guides &amp; Handbooks ({filteredGuides.length})
+              </h2>
+              <p style={{ margin: '4px 0 0', color: '#6D857C', fontSize: 13.5 }}>
+                Curated by senior property legal advisors. Click &quot;Read Guide&quot; to open the full PDF handbook.
+              </p>
+            </div>
+            {/* <Link to="/blogs" className={styles.readMoreBtn} style={{ fontSize: '14.5px', fontWeight: 800 }}>
+              Read ProBridge Blogs &amp; Market Insights →
+            </Link> */}
+          </div>
+
+          {/* Category Filter Pills */}
+          {categories.length > 2 && (
+            <div className={styles.blogFilterPills} style={{ marginBottom: 28 }}>
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  className={`${styles.blogFilterPill} ${activeCategory === cat ? styles.blogFilterPillActive : ''}`}
+                  onClick={() => setActiveCategory(cat)}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '60px 0', color: '#6D857C' }}>
+              Loading Bridge Guides...
+            </div>
+          ) : filteredGuides.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '60px 0', color: '#6D857C' }}>
+              No guides found in this category.
+            </div>
+          ) : (
+            <div className={styles.guideGrid}>
+              {filteredGuides.map((guide, i) => {
+                const coverImg = guide.image ||
+                  CATEGORY_IMAGES[guide.category] ||
+                  CATEGORY_IMAGES['Buyer Handbook'];
+
+                return (
+                  <div key={guide._id || guide.id || i} className={styles.guideCard} data-reveal data-delay={i * 80}>
+                    <div className={styles.guideImgWrap}>
+                      <img
+                        src={coverImg}
+                        alt={guide.title}
+                        className={styles.guideImg}
+                        loading="lazy"
+                        onError={(e) => {
+                          e.target.src = CATEGORY_IMAGES['Buyer Handbook'];
+                        }}
+                      />
+                      <div className={styles.articleImgOverlay} />
+                      <span className={styles.articleCat}>{guide.category || 'Buyer Handbook'}</span>
+                      <span className={styles.guidePdfBadge}>
+                        <FileText size={11} style={{ verticalAlign: -1, marginRight: 3 }} />
+                        PDF
+                      </span>
+                    </div>
+
+                    <div className={styles.guideBody}>
+                      <div className={styles.guideDocMeta}>
+                        <span className={styles.guideFileName}>
+                          📄 {guide.fileName || 'guide.pdf'}
+                        </span>
+                        {guide.fileSize && (
+                          <span className={styles.guideFileSize}>({guide.fileSize})</span>
+                        )}
+                      </div>
+
+                      <h3 className={styles.guideTitle}>{guide.title}</h3>
+                      <p className={styles.guideDesc}>{guide.description}</p>
+
+                      <div className={styles.guideActionRow}>
+                        {/* Primary button: Click to go directly to PDF page */}
+                        <a
+                          href={getSafePdfUrl(guide)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.readGuidePrimaryBtn}
+                          title={`Read PDF: ${guide.title}`}
+                          onClick={(e) => handleReadGuide(e, guide)}
+                        >
+                          <BookOpen size={15} />
+                          <span>Read Guide</span>
+                          <ExternalLink size={13} style={{ marginLeft: 3, opacity: 0.85 }} />
+                        </a>
+
+                        {/* Secondary button: In-page quick preview */}
+                        <button
+                          type="button"
+                          className={styles.readGuidePreviewBtn}
+                          onClick={() => handlePreviewGuide(guide)}
+                          title="Preview guide in browser"
+                        >
+                          <Eye size={14} />
+                          <span>Preview</span>
+                        </button>
+
+                        {/* Download button */}
+                        {guide.pdfUrl && (
+                          <a
+                            href={getSafePdfUrl(guide, true)}
+                            download={guide.fileName || 'guide.pdf'}
+                            className={styles.guideDownloadBtn}
+                            title="Download PDF Handbook"
+                            onClick={(e) => handleDownloadPdf(e)}
+                          >
+                            <Download size={15} />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── PDF Guide In-Page Reader Modal ── */}
+      {readingGuide && (
+        <div className={styles.modalBackdrop} onClick={() => setReadingGuide(null)}>
+          <div
+            className={`${styles.modalBox} ${styles.guideModalBox}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className={styles.modalClose}
+              onClick={() => setReadingGuide(null)}
+              aria-label="Close"
+            >
+              <X size={18} />
+            </button>
+
+            <div className={styles.guideModalHeader}>
+              <div>
+                <span className={styles.articleCat} style={{ position: 'static', display: 'inline-block', marginBottom: 6 }}>
+                  {readingGuide.category || 'Buyer Handbook'}
+                </span>
+                <h3 className={styles.guideModalTitle}>{readingGuide.title}</h3>
+                <p className={styles.guideModalMeta}>
+                  📄 {readingGuide.fileName || 'guide.pdf'} {readingGuide.fileSize ? `(${readingGuide.fileSize})` : ''}
+                </p>
               </div>
-            ))}
+
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+                <a
+                  href={getSafePdfUrl(readingGuide)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.openMapBtn}
+                  style={{ textDecoration: 'none' }}
+                  onClick={(e) => handleReadGuide(e, readingGuide)}
+                >
+                  <ExternalLink size={14} />
+                  <span>Open PDF Page</span>
+                </a>
+                <a
+                  href={getSafePdfUrl(readingGuide, true)}
+                  download={readingGuide.fileName || 'guide.pdf'}
+                  className={styles.guideDownloadBtnModal}
+                  onClick={(e) => handleDownloadPdf(e)}
+                >
+                  <Download size={14} />
+                  <span>Download</span>
+                </a>
+              </div>
+            </div>
+
+            <p style={{ margin: '0 0 16px', fontSize: 13.5, color: '#475569', lineHeight: 1.6 }}>
+              {readingGuide.description}
+            </p>
+
+            <div className={styles.guideIframeWrap}>
+              <iframe
+                src={getSafePdfUrl(readingGuide)}
+                title={readingGuide.title}
+                className={styles.guideIframe}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+/* ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ 
+   6.5. BRIDGEGUIDE BLOGS & ARTICLES (From Admin Dashboard)
+═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═  */
+function BlogsView() {
+  const navigate = useNavigate();
+  const { user, openLoginModal } = useAuth();
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState('All');
+
+  const handleReadArticle = (blog) => {
+    if (!user) {
+      openLoginModal();
+      return;
+    }
+    const targetId = blog._id || blog.slug || blog.id;
+    navigate(`/blogs/${targetId}`);
+  };
+
+  useEffect(() => {
+    getBlogs()
+      .then(({ data }) => {
+        const list = data?.blogs || [];
+        setBlogs(list);
+      })
+      .catch((err) => {
+        console.error('Failed to load blogs:', err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  const categories = ['All', ...Array.from(new Set(blogs.map((b) => b.category).filter(Boolean)))];
+
+  const filteredBlogs = activeCategory === 'All'
+    ? blogs
+    : blogs.filter((b) => (b.category || '').toLowerCase() === activeCategory.toLowerCase());
+
+  return (
+    <>
+      {/* ── Hero Banner ── */}
+      <div
+        className={styles.fullHero}
+        style={{ backgroundImage: `url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=80')` }}
+      >
+        <div className={styles.heroOverlay} />
+        <div className={styles.heroContent}>
+          <div className={styles.breadcrumbBar}>
+            <div className={styles.breadcrumbInner}>
+              <Link to="/" className={styles.breadLink}>Home</Link>
+              <ChevronRight size={13} />
+              <Link to="/guide" className={styles.breadLink}>BridgeGuide</Link>
+              <ChevronRight size={13} />
+              <span className={styles.breadCurrent}>Blogs</span>
+            </div>
+          </div>
+          <span className={styles.heroTag}>Knowledge &amp; Insights</span>
+          <h1 className={styles.heroTitle}>BridgeGuide Blogs &amp; Articles</h1>
+          <p className={styles.heroSub}>
+            Real estate market intelligence, RERA compliance, high-yielding commercial assets, and sustainable architecture tips published by ProBridge experts.
+          </p>
+        </div>
+      </div>
+
+      {/* ── Category Filter Bar & Content ── */}
+      <div className={styles.section}>
+        <div className={styles.sectionInner}>
+          <div className={styles.blogFilterHeader}>
+            <div>
+              <h2 className={styles.sectionTitle} style={{ marginBottom: 6 }}>All Articles</h2>
+              <p className={styles.sectionSub} style={{ margin: 0 }}>
+                Explore expert articles curated to give you clarity and maximum investment ROI
+              </p>
+            </div>
+            {/* Category Pills */}
+            <div className={styles.blogFilterPills}>
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  className={`${styles.blogFilterPill} ${activeCategory === cat ? styles.blogFilterPillActive : ''}`}
+                  onClick={() => setActiveCategory(cat)}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '60px 0', color: '#6D857C' }}>
+              Loading articles...
+            </div>
+          ) : filteredBlogs.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '60px 0', color: '#6D857C' }}>
+              No articles found in this category.
+            </div>
+          ) : (
+            <div className={styles.blogGrid}>
+              {filteredBlogs.map((blog, i) => {
+                const factors = Array.isArray(blog.keyfactors)
+                  ? blog.keyfactors
+                  : (typeof blog.keyfactors === 'string' ? blog.keyfactors.split('\n').filter(Boolean) : []);
+
+                const formattedDate = blog.createdAt
+                  ? new Date(blog.createdAt).toLocaleDateString('en-IN', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                  })
+                  : null;
+
+                return (
+                  <article
+                    key={blog._id || blog.slug || i}
+                    className={styles.blogCard}
+                    data-reveal
+                    data-delay={i * 60}
+                  >
+                    <div
+                      className={styles.blogImgWrap}
+                      onClick={() => handleReadArticle(blog)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <img
+                        src={blog.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80'}
+                        alt={blog.title}
+                        className={styles.blogImg}
+                        loading="lazy"
+                        onError={(e) => {
+                          e.target.src = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80';
+                        }}
+                      />
+                      <div className={styles.articleImgOverlay} />
+                      <span className={styles.articleCat}>{blog.category || 'Article'}</span>
+                    </div>
+
+                    <div className={styles.blogBody}>
+                      <div className={styles.blogMetaRow}>
+                        <span className={styles.blogMetaAuthor}>
+                          <UserIcon size={11} style={{ display: 'inline', marginRight: 3 }} />
+                          {blog.author || 'ProBridge Editorial'}
+                        </span>
+                        {formattedDate && (
+                          <span className={styles.blogMetaDate}>
+                            <Calendar size={11} style={{ display: 'inline', marginRight: 3 }} />
+                            {formattedDate}
+                          </span>
+                        )}
+                        <span className={styles.articleReadTime}>{blog.readTime || '5 min'}</span>
+                      </div>
+
+                      <h3
+                        className={styles.blogTitle}
+                        onClick={() => handleReadArticle(blog)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        {blog.title}
+                      </h3>
+                      <p className={styles.blogDesc}>{blog.description}</p>
+
+                      {factors.length > 0 && (
+                        <div className={styles.blogFactorsCompact}>
+                          ✦ {factors[0]}
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        className={styles.blogReadBtn}
+                        onClick={() => handleReadArticle(blog)}
+                      >
+                        Read Article →
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+    </>
+  );
+}
+
+/* ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ 
+   6.6. BLOG ARTICLE DETAILS PAGE (Dedicated Article View)
+═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═ ═  */
+function BlogDetailView({ blogId }) {
+  const navigate = useNavigate();
+  const { user, openLoginModal } = useAuth();
+  const [blog, setBlog] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+  const [relatedBlogs, setRelatedBlogs] = useState([]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    let active = true;
+    setLoading(true);
+
+    getBlogById(blogId)
+      .then(({ data }) => {
+        if (!active) return;
+        setBlog(data?.blog || null);
+      })
+      .catch((err) => {
+        console.error('Failed to load blog article:', err);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    getBlogs()
+      .then(({ data }) => {
+        if (!active) return;
+        const all = data?.blogs || [];
+        setRelatedBlogs(all.filter((b) => (b._id || b.slug || b.id) !== blogId).slice(0, 3));
+      })
+      .catch(() => {});
+
+    return () => { active = false; };
+  }, [blogId]);
+
+  const handleShare = () => {
+    if (!user) {
+      openLoginModal();
+      return;
+    }
+    const currentUrl = window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: blog?.title || 'ProBridge Article', url: currentUrl }).catch(() => { });
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(currentUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className={styles.section} style={{ textAlign: 'center', padding: '120px 20px' }}>
+        <div className={styles.loadingSpinner} />
+        <p style={{ marginTop: 16, color: '#6D857C', fontSize: 15, fontWeight: 600 }}>Loading article details...</p>
+      </div>
+    );
+  }
+
+  if (!blog) {
+    return (
+      <div className={styles.section} style={{ textAlign: 'center', padding: '100px 20px' }}>
+        <div className={styles.sectionInner}>
+          <h2 style={{ fontSize: 26, fontWeight: 800, color: '#0F241D', marginBottom: 12 }}>Article Not Found</h2>
+          <p style={{ color: '#6D857C', marginBottom: 24, fontSize: 15 }}>
+            The requested article could not be located or may have been updated.
+          </p>
+          <Link to="/blogs" className={styles.backPillBtn}>
+            <ArrowLeft size={16} /> Back to All Articles
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const factors = Array.isArray(blog.keyfactors)
+    ? blog.keyfactors
+    : String(blog.keyfactors || '').split('\n').map((s) => s.trim()).filter(Boolean);
+
+  const formattedDate = blog.createdAt
+    ? new Date(blog.createdAt).toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
+    : null;
+
+  const paragraphs = String(blog.description || '')
+    .split('\n\n')
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  return (
+    <>
+      {/* ── Article Header Banner ── */}
+      <div className={styles.blogDetailHero}>
+        <div className={styles.blogDetailHeroInner}>
+          <div className={styles.blogDetailTopNav}>
+            <Link to="/blogs" className={styles.backPillBtn}>
+              <ArrowLeft size={15} /> All Articles
+            </Link>
+            <div className={styles.breadcrumbBar} style={{ padding: 0, background: 'none' }}>
+              <div className={styles.breadcrumbInner}>
+                <Link to="/" className={styles.breadLink}>Home</Link>
+                <ChevronRight size={13} />
+                <Link to="/guide" className={styles.breadLink}>BridgeGuide</Link>
+                <ChevronRight size={13} />
+                <Link to="/blogs" className={styles.breadLink}>Blogs</Link>
+                <ChevronRight size={13} />
+                <span className={styles.breadCurrent}>{blog.title.slice(0, 32)}...</span>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 18 }}>
+            <span className={styles.articleCatBadge}>{blog.category || 'Real Estate Analysis'}</span>
+            <h1 className={styles.blogDetailPageTitle}>{blog.title}</h1>
+
+            <div className={styles.blogDetailMetaRow}>
+              <div className={styles.blogDetailMetaLeft}>
+                <span className={styles.blogMetaAuthorDetail}>
+                  <UserIcon size={14} style={{ display: 'inline', marginRight: 5, verticalAlign: -2 }} />
+                  {blog.author || 'ProBridge Editorial'}
+                </span>
+                {formattedDate && (
+                  <span className={styles.blogMetaDateDetail}>
+                    <Calendar size={14} style={{ display: 'inline', marginRight: 5, verticalAlign: -2 }} />
+                    {formattedDate}
+                  </span>
+                )}
+                <span className={styles.blogMetaTimeDetail}>
+                  <Clock size={14} style={{ display: 'inline', marginRight: 5, verticalAlign: -2 }} />
+                  {blog.readTime || '5 min read'}
+                </span>
+              </div>
+
+              <button type="button" className={styles.blogShareBtn} onClick={handleShare} title="Share article link">
+                {copied ? <Check size={14} color="#10B981" /> : <Share2 size={14} />}
+                <span>{copied ? 'Link Copied!' : 'Share'}</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* ── Article Body Content ── */}
+      <div className={styles.blogDetailMainSection}>
+        <div className={styles.blogDetailContentWrap}>
+          {/* Cover Photo */}
+          {blog.image && (
+            <div className={styles.blogDetailImgWrap}>
+              <img
+                src={blog.image}
+                alt={blog.title}
+                className={styles.blogDetailImg}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1200&q=80';
+                }}
+              />
+              <span className={styles.blogDetailImgOverlayCat}>{blog.category || 'Article'}</span>
+            </div>
+          )}
+
+          {/* Login Gate Protection: if user is not logged in, prompt them to log in */}
+          {!user ? (
+            <div className={styles.blogLoginGateCard}>
+              <div className={styles.blogLoginGateIconWrap}>
+                <ShieldCheck size={28} color="#0D5F4E" />
+              </div>
+              <h3 className={styles.blogLoginGateTitle}>Sign In to Read Full Article</h3>
+              <p className={styles.blogLoginGateDesc}>
+                This premium real estate analysis is exclusively available for verified ProBridge members. Log in or create a free account to unlock all insights and market trends.
+              </p>
+              <button
+                type="button"
+                className={styles.blogLoginGateBtn}
+                onClick={openLoginModal}
+              >
+                Log In to Unlock Article
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Full Article Text */}
+              <div className={styles.blogDetailBodyText}>
+                {paragraphs.length > 0 ? (
+                  paragraphs.map((p, idx) => (
+                    <p key={idx} className={idx === 0 ? styles.blogDetailLeadPara : styles.blogDetailPara}>
+                      {p}
+                    </p>
+                  ))
+                ) : (
+                  <p className={styles.blogDetailLeadPara}>{blog.description}</p>
+                )}
+              </div>
+
+              {/* Key Factors & Strategic Highlights Box */}
+              {factors.length > 0 && (
+                <div className={styles.blogDetailFactorsCard}>
+                  <div className={styles.blogDetailFactorsHeader}>
+                    <div className={styles.factorsIconCircle}>
+                      <Sparkles size={18} color="#0D5F4E" />
+                    </div>
+                    <div>
+                      <h4 className={styles.blogDetailFactorsTitle}>Key Factors &amp; Strategic Highlights</h4>
+                      <p style={{ margin: 0, fontSize: 13, color: '#6D857C' }}>
+                        Crucial takeaways verified by ProBridge property consultants.
+                      </p>
+                    </div>
+                  </div>
+                  <ul className={styles.blogDetailFactorsList}>
+                    {factors.map((f, i) => (
+                      <li key={i} className={styles.blogDetailFactorItem}>
+                        <CheckCircle2 size={18} className={styles.factorCheckIcon} />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Advisory Consultation Card */}
+              <div className={styles.blogDetailCtaCard}>
+                <div>
+                  <h4 className={styles.blogDetailCtaTitle}>Need Tailored Guidance on this Topic?</h4>
+                  <p className={styles.blogDetailCtaText}>
+                    Connect with our dedicated real estate portfolio managers for verified developer due-diligence and site visits.
+                  </p>
+                </div>
+                <Link to="/contact-us" className={styles.blogDetailCtaBtn}>
+                  Speak with an Advisor →
+                </Link>
+              </div>
+            </>
+          )}
+
+          {/* Bottom Navigation */}
+          <div className={styles.blogDetailBottomNav}>
+            <Link to="/blogs" className={styles.backPillBtn}>
+              <ArrowLeft size={15} /> Back to All Articles
+            </Link>
+            <button type="button" className={styles.blogShareBtn} onClick={handleShare}>
+              {copied ? <Check size={14} color="#10B981" /> : <Share2 size={14} />}
+              <span>{copied ? 'Link Copied!' : 'Share Article'}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Related Articles ── */}
+      {relatedBlogs.length > 0 && (
+        <div className={styles.sectionAlt} style={{ padding: '60px 0 80px' }}>
+          <div className={styles.sectionInner}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
+              <div>
+                <span className={styles.heroTag} style={{ marginBottom: 4 }}>Keep Exploring</span>
+                <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Related Articles &amp; Insights</h2>
+              </div>
+              <Link to="/blogs" className={styles.readMoreBtn} style={{ fontSize: 13.5 }}>
+                View All Articles →
+              </Link>
+            </div>
+
+            <div className={styles.blogGrid}>
+              {relatedBlogs.map((rb) => {
+                const targetId = rb._id || rb.slug || rb.id;
+                return (
+                  <article key={targetId} className={styles.blogCard}>
+                    <div
+                      className={styles.blogImgWrap}
+                      onClick={() => {
+                        if (!user) {
+                          openLoginModal();
+                          return;
+                        }
+                        navigate(`/blogs/${targetId}`);
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <img src={rb.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80'} alt={rb.title} className={styles.blogImg} />
+                      <div className={styles.articleImgOverlay} />
+                      <span className={styles.articleCat}>{rb.category || 'Article'}</span>
+                    </div>
+
+                    <div className={styles.blogBody}>
+                      <div className={styles.blogMetaRow}>
+                        <span className={styles.blogMetaAuthor}>{rb.author || 'ProBridge Editorial'}</span>
+                        <span className={styles.articleReadTime}>{rb.readTime || '5 min'}</span>
+                      </div>
+                      <h3
+                        className={styles.blogTitle}
+                        onClick={() => {
+                          if (!user) {
+                            openLoginModal();
+                            return;
+                          }
+                          navigate(`/blogs/${targetId}`);
+                        }}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        {rb.title}
+                      </h3>
+                      <p className={styles.blogDesc}>{rb.description}</p>
+                      <button
+                        type="button"
+                        className={styles.blogReadBtn}
+                        onClick={() => {
+                          if (!user) {
+                            openLoginModal();
+                            return;
+                          }
+                          navigate(`/blogs/${targetId}`);
+                        }}
+                      >
+                        Read Article →
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -761,7 +1771,7 @@ function NriServicesView() {
       <div className={styles.fullHero} style={{ backgroundImage: `url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1600&q=80')` }}>
         <div className={styles.heroOverlay} />
         <div className={styles.heroContent}>
-          <Breadcrumb label="NRI Services" />
+          {/* <Breadcrumb label="NRI Services" /> */}
           <span className={styles.heroTag}>Global Indian Solutions</span>
           <h1 className={styles.heroTitle}>NRI Real Estate Services</h1>
           <p className={styles.heroSub}>Dedicated overseas property desk. Helping Non-Resident Indians effortlessly buy, manage, and monitor high-yielding Indian properties from anywhere in the world.</p>
@@ -810,7 +1820,7 @@ function HowToBuyView() {
       <div className={styles.fullHero} style={{ backgroundImage: `url('https://images.unsplash.com/photo-1560184897-ae75f418493e?w=1600&q=80')` }}>
         <div className={styles.heroOverlay} />
         <div className={styles.heroContent}>
-          <Breadcrumb label="How to Buy" />
+          {/* <Breadcrumb label="How to Buy" /> */}
           <span className={styles.heroTag}>Buyer Roadmap</span>
           <h1 className={styles.heroTitle}>How to Buy Property with ProBridge</h1>
           <p className={styles.heroSub}>A simple, transparent 5-step roadmap to discovering and purchasing your dream home without hidden surprises.</p>

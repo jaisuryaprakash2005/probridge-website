@@ -19,6 +19,8 @@ export default function LoginModal() {
   const [resendTimer, setResendTimer] = useState(30);
   const [confirmationResult, setConfirmationResult] = useState(null);
   const [recaptchaReady, setRecaptchaReady] = useState(false);
+  const [isBackendOtp, setIsBackendOtp] = useState(false);
+  const [infoMsg, setInfoMsg] = useState('');
 
   const otpInputsRef = useRef([]);
   const recaptchaVerifierRef = useRef(null);
@@ -114,10 +116,11 @@ export default function LoginModal() {
 
   const cleanPhone = phone.replace(/\D/g, '').slice(-10);
 
-  // ─── Step 1: Send REAL SMS OTP via Firebase ─────────────────────────────
+  // ─── Step 1: Send REAL SMS OTP via Firebase (with Backend Fallback) ──
   const handleSendOtp = async (e) => {
     e?.preventDefault();
     setError('');
+    setInfoMsg('');
 
     if (!name.trim()) {
       setError('Please enter your full name');
@@ -135,9 +138,11 @@ export default function LoginModal() {
     setLoading(true);
     try {
       const phoneWithCountry = `+91${cleanPhone}`;
-      // Sends REAL SMS via Firebase with verified reCAPTCHA token
+      // Attempt Firebase SMS with verified reCAPTCHA token
       const result = await signInWithPhoneNumber(auth, phoneWithCountry, recaptchaVerifierRef.current);
       setConfirmationResult(result);
+      setIsBackendOtp(false);
+      setInfoMsg('');
       setStep(2);
       setResendTimer(30);
       setOtp(['', '', '', '', '', '']);
@@ -145,6 +150,38 @@ export default function LoginModal() {
       console.error('Firebase Real SMS OTP Error:', err?.code, err?.message, err);
       // Re-initialize reCAPTCHA on error
       initRecaptcha();
+
+      const lastErr = String(window.__lastGoogleError || '');
+      const isCaptchaOrHostnameIssue =
+        err?.code === 'auth/captcha-check-failed' ||
+        err?.code === 'auth/unauthorized-domain' ||
+        err?.message?.includes('CAPTCHA_CHECK_FAILED') ||
+        lastErr.includes('CAPTCHA_CHECK_FAILED') ||
+        lastErr.includes('Hostname match not found');
+
+      if (isCaptchaOrHostnameIssue) {
+        console.warn('⚠️ Google reCAPTCHA hostname mismatch detected. Falling back to ProBridge direct OTP...');
+        try {
+          const res = await api.post('/auth/send-otp', {
+            phone: cleanPhone,
+            name: name.trim(),
+          });
+          if (res.data?.success) {
+            setIsBackendOtp(true);
+            setConfirmationResult(null);
+            setStep(2);
+            setResendTimer(30);
+            setOtp(['', '', '', '', '', '']);
+            const otpCode = res.data?.devOtp ? ` (Code: ${res.data.devOtp})` : '';
+            setInfoMsg(`Domain verification in Firebase requires adding "${window.location.hostname}" to Firebase Console. Switched to direct OTP verification.${otpCode}`);
+            setError('');
+            return;
+          }
+        } catch (backendErr) {
+          console.error('Backend send-otp fallback error:', backendErr);
+        }
+      }
+
       const googleRaw = window.__lastGoogleError ? ` | Google: ${window.__lastGoogleError}` : '';
       const detailed = err?.code ? ` [${err.code}]` : '';
       setError(`${getFriendlyError(err)}${detailed}${googleRaw}`);
@@ -204,6 +241,29 @@ export default function LoginModal() {
     setError('');
     setLoading(true);
     try {
+      if (isBackendOtp) {
+        // Verify via ProBridge Backend API
+        const res = await api.post('/auth/phone-login', {
+          phone: cleanPhone,
+          name: name.trim(),
+          otp: enteredOtp,
+        });
+        if (res.data?.success && res.data.token) {
+          localStorage.setItem('pb_token', res.data.token);
+          const loggedInUser = res.data.user || {
+            name: name.trim() || 'ProBridge User',
+            phone: cleanPhone,
+            role: 'user',
+          };
+          localStorage.setItem('pb_user', JSON.stringify(loggedInUser));
+          closeLoginModal();
+          window.location.reload();
+          return;
+        } else {
+          throw new Error(res.data?.message || 'Invalid verification code');
+        }
+      }
+
       if (!confirmationResult) {
         throw new Error('Verification session expired. Please click Resend OTP.');
       }
@@ -246,10 +306,33 @@ export default function LoginModal() {
   };
 
   const submitOtp = async (code) => {
-    if (loading || !confirmationResult) return;
+    if (loading) return;
+    if (!isBackendOtp && !confirmationResult) return;
     setError('');
     setLoading(true);
     try {
+      if (isBackendOtp) {
+        const res = await api.post('/auth/phone-login', {
+          phone: cleanPhone,
+          name: name.trim(),
+          otp: code,
+        });
+        if (res.data?.success && res.data.token) {
+          localStorage.setItem('pb_token', res.data.token);
+          const loggedInUser = res.data.user || {
+            name: name.trim() || 'ProBridge User',
+            phone: cleanPhone,
+            role: 'user',
+          };
+          localStorage.setItem('pb_user', JSON.stringify(loggedInUser));
+          closeLoginModal();
+          window.location.reload();
+          return;
+        } else {
+          throw new Error(res.data?.message || 'Invalid verification code');
+        }
+      }
+
       const userCredential = await confirmationResult.confirm(code);
       const firebaseToken = await userCredential.user.getIdToken();
       await completeLogin(userCredential, firebaseToken);
@@ -265,7 +348,8 @@ export default function LoginModal() {
     const msg = err?.message || '';
 
     if (code === 'auth/unauthorized-domain') {
-      return 'Domain "jaisuryaprakash2005.github.io" is not authorized in Firebase. Please add it to Firebase Console → Authentication → Settings → Authorized domains.';
+      const currentHost = typeof window !== 'undefined' ? window.location.hostname : 'current domain';
+      return `Domain "${currentHost}" is not authorized in Firebase. Please add "${currentHost}" to Firebase Console → Authentication → Settings → Authorized domains.`;
     }
     if (code === 'auth/too-many-requests') {
       return 'Firebase SMS rate-limit reached for this number. Please wait a few minutes before trying again.';
@@ -279,8 +363,9 @@ export default function LoginModal() {
     if (code === 'auth/invalid-phone-number') {
       return 'Please enter a valid 10-digit Indian mobile number.';
     }
-    if (code === 'auth/captcha-check-failed') {
-      return 'reCAPTCHA check failed. Please refresh the page and try again.';
+    if (code === 'auth/captcha-check-failed' || msg.includes('CAPTCHA_CHECK_FAILED') || msg.includes('Hostname match not found')) {
+      const currentHost = typeof window !== 'undefined' ? window.location.hostname : 'current domain';
+      return `reCAPTCHA hostname match failed: Domain "${currentHost}" is not added in Firebase Console → Authentication → Settings → Authorized domains.`;
     }
     if (code === 'auth/invalid-verification-code' || msg.includes('invalid-verification-code')) {
       return 'Incorrect SMS code. Please check the SMS on your phone and try again.';
@@ -345,6 +430,14 @@ export default function LoginModal() {
               Change
             </button>
           </p>
+        )}
+
+        {/* Info Banner */}
+        {infoMsg && (
+          <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', color: '#1E40AF', padding: '10px 14px', borderRadius: 10, fontSize: '13px', marginBottom: 14, display: 'flex', alignItems: 'flex-start', gap: 8, lineHeight: 1.45 }}>
+            <CheckCircle2 size={16} color="#2563EB" style={{ flexShrink: 0, marginTop: 2 }} />
+            <span>{infoMsg}</span>
+          </div>
         )}
 
         {/* Error Banner */}

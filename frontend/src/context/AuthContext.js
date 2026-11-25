@@ -73,6 +73,8 @@ export function AuthProvider({ children }) {
   const logout = useCallback(() => {
     localStorage.removeItem('pb_token');
     localStorage.removeItem('pb_user');
+    localStorage.removeItem('pb_contact_submitted_global');
+    localStorage.removeItem('pb_contact_submission_data');
     setUser(null);
   }, []);
 

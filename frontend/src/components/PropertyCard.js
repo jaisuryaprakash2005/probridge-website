@@ -34,7 +34,7 @@ function emiPerMonth(raw) {
 
 /* ── Component ──────────────────────────────────────────────────── */
 export default function PropertyCard({ property: p, onEnquire }) {
-  const { user } = useAuth();
+  const { user, openLoginModal } = useAuth();
   const { isSaved, toggle } = useSaved();
   const saved = isSaved(p.id || p._id);
   const [imgErr, setImgErr] = useState(false);
@@ -42,13 +42,20 @@ export default function PropertyCard({ property: p, onEnquire }) {
   const handleSave = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!user) { alert('Please log in to save properties.'); return; }
+    if (!user) {
+      openLoginModal();
+      return;
+    }
     toggle(p);
   };
 
   const handleEnquire = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!user) {
+      openLoginModal();
+      return;
+    }
     onEnquire?.(p);
   };
 

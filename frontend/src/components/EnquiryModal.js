@@ -14,8 +14,15 @@ export default function EnquiryModal({
   initialEmail = '',
   onSuccess,
 }) {
-  const { user } = useAuth();
+  const { user, openLoginModal } = useAuth();
   const [mode, setMode] = useState(initialMode); // 'enquire' | 'callback'
+
+  useEffect(() => {
+    if (!user) {
+      if (onClose) onClose();
+      openLoginModal();
+    }
+  }, [user, onClose, openLoginModal]);
 
   const defaultMessage = (m, unit) => {
     if (m === 'callback') {
@@ -65,6 +72,12 @@ export default function EnquiryModal({
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!user) {
+      if (onClose) onClose();
+      openLoginModal();
+      return;
+    }
 
     if (!form.phone.trim()) {
       setError('Please provide a 10-digit phone number so our advisor can reach you.');

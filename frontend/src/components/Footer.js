@@ -23,6 +23,7 @@ const COMPANY_LINKS = [
 
 const RESOURCE_LINKS = [
   { label: 'Bridgeguide', to: '/guide' },
+  { label: 'Blogs & Articles', to: '/blogs' },
   { label: 'NRI Services', to: '/nri-services' },
   { label: 'How to Buy', to: '/how-to-buy' },
 ];
@@ -59,7 +60,7 @@ export default function Footer() {
   const location = useLocation();
 
   // Company details section appears on the home screen ('/') and company info pages
-  const INFO_PATHS = ['/about-us', '/careers', '/contact-us', '/privacy', '/guide', '/nri-services', '/how-to-buy'];
+  const INFO_PATHS = ['/about-us', '/careers', '/contact-us', '/privacy', '/guide', '/blogs', '/bridgeguide', '/nri-services', '/how-to-buy'];
   if (location.pathname !== '/' && !INFO_PATHS.includes(location.pathname)) {
     return null;
   }

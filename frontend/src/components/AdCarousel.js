@@ -6,6 +6,7 @@ import {
   Image as ImageIcon, ShieldCheck
 } from 'lucide-react';
 import { getActiveAds, trackAdClick, getProperties } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import styles from './AdCarousel.module.css';
 
 const AUTO_SWIPE_INTERVAL = 5500; // 5.5 seconds per ad
@@ -79,6 +80,7 @@ const FALLBACK_ADS = [
 
 export default function AdCarousel({ onEnquire }) {
   const navigate = useNavigate();
+  const { user, openLoginModal } = useAuth();
   const [ads, setAds] = useState(FALLBACK_ADS);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -174,6 +176,10 @@ export default function AdCarousel({ onEnquire }) {
 
   // Direct Enquiry modal opener
   const handleEnquire = useCallback((ad) => {
+    if (!user) {
+      openLoginModal();
+      return;
+    }
     if (onEnquire) {
       onEnquire({
         id: ad.propertyId,
@@ -184,7 +190,7 @@ export default function AdCarousel({ onEnquire }) {
         image: ad.image,
       });
     }
-  }, [onEnquire]);
+  }, [onEnquire, user, openLoginModal]);
 
   if (!ads || ads.length === 0) return null;
 

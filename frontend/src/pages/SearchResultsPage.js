@@ -104,7 +104,7 @@ export function getPropertyImageUrl(p) {
 
 /* ─€─€ Horizontal Property List Card (Premium Style) ─€─€─€─€ */
 function PropertyListCard({ property: p, onEnquire }) {
-  const { user } = useAuth();
+  const { user, openLoginModal } = useAuth();
   const { isSaved, toggle } = useSaved();
   const saved = isSaved(p.id || p._id);
   const [imgSrc, setImgSrc] = useState(() => getPropertyImageUrl(p));
@@ -116,7 +116,11 @@ function PropertyListCard({ property: p, onEnquire }) {
 
   const handleSave = (e) => {
     e.preventDefault();
-    if (!user) { alert('Please log in to save properties.'); return; }
+    e.stopPropagation();
+    if (!user) {
+      openLoginModal();
+      return;
+    }
     toggle(p);
   };
 
@@ -178,8 +182,15 @@ function PropertyListCard({ property: p, onEnquire }) {
             className={styles.listImgBtn}
             onClick={(e) => {
               e.preventDefault();
+              e.stopPropagation();
+              if (!user) {
+                openLoginModal();
+                return;
+              }
               if (navigator.share) {
                 navigator.share({ title: p.title, url: window.location.href });
+              } else {
+                navigator.clipboard?.writeText(window.location.href);
               }
             }}
             aria-label="Share"
@@ -268,7 +279,15 @@ function PropertyListCard({ property: p, onEnquire }) {
           <span className={styles.listDetailsBtn}>View Details</span>
           <button
             className={styles.listCallbackBtn}
-            onClick={(e) => { e.preventDefault(); onEnquire?.(p); }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (!user) {
+                openLoginModal();
+                return;
+              }
+              onEnquire?.(p);
+            }}
           >
             Get Callback
           </button>
@@ -281,6 +300,7 @@ function PropertyListCard({ property: p, onEnquire }) {
 
 /* ─€─€ Main Page ─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€─€ */
 export default function SearchResultsPage({ isSavedView: isSavedProp = false }) {
+  const { user, openLoginModal } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   const isSavedView = Boolean(isSavedProp || location.pathname === '/saved' || searchParams.get('saved') === 'true');
@@ -291,6 +311,14 @@ export default function SearchResultsPage({ isSavedView: isSavedProp = false }) 
   const [page,        setPage]        = useState(1);
   const [enquiryProp, setEnquiryProp] = useState(null);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  const handleEnquire = (p) => {
+    if (!user) {
+      openLoginModal();
+      return;
+    }
+    setEnquiryProp(p);
+  };
 
   /* ─€─€ URL params ─€─€ */
   const q            = searchParams.get('q')            || '';
@@ -1143,7 +1171,7 @@ export default function SearchResultsPage({ isSavedView: isSavedProp = false }) 
             ) : (
               <div className={`${styles.list} ${isRefreshing ? styles.listBlur : styles.listNormal}`}>
                 {properties.map(p => (
-                  <PropertyListCard key={p.id || p._id} property={p} onEnquire={setEnquiryProp} />
+                  <PropertyListCard key={p.id || p._id} property={p} onEnquire={handleEnquire} />
                 ))}
               </div>
             )}

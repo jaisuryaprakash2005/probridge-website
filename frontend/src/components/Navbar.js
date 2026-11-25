@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   Heart, User, Menu, X, ChevronDown, Sparkles,
   Search, Building2, Home, TreePine, Store, TrendingUp,
-  Facebook, Instagram, Youtube, Linkedin,
+  Facebook, Instagram, Youtube, Linkedin, BookOpen, FileText,
 } from 'lucide-react';
 import Logo from './Logo';
 import LoginModal from './LoginModal';
@@ -47,6 +47,14 @@ const NAV_ITEMS = [
       { icon: TrendingUp, label: 'Pre-Leased',   desc: 'Rental income from day one',       to: '/search?buildingType=Commercial&tag=pre-leased' },
       { icon: Store,      label: 'Retail Shops', desc: 'High-street & mall shops',          to: '/search?buildingType=Commercial&propertyType=Shop' },
       { icon: Building2,  label: 'Offices',      desc: 'Grade A corporate offices',         to: '/search?buildingType=Commercial&propertyType=Office' },
+    ],
+  },
+  {
+    label: 'BridgeGuide',
+    to: '/guide',
+    sub: [
+      { icon: FileText, label: 'Blogs',            desc: 'Real estate articles, insights & updates', to: '/blogs' },
+      { icon: BookOpen, label: 'Homebuyer Guides', desc: 'Buying checklists, RERA & legal advice',    to: '/guide' },
     ],
   },
 ];
