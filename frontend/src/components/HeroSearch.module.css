@@ -558,27 +558,48 @@
   background: #E8F5F0;
 }
 
-/* ─── Responsive Media Queries ────────────────────────────────────────── */
+/* ─── Responsive Media Queries (Mobile App Aesthetics & Side Padding) ── */
 @media (max-width: 860px) {
   .bannerContainer {
     aspect-ratio: auto;
-    min-height: 260px;
+    min-height: 270px;
   }
   .titleWrap {
-    padding-bottom: 40px;
+    padding-bottom: 44px;
+    padding-left: clamp(16px, 4.5vw, 24px);
+    padding-right: clamp(16px, 4.5vw, 24px);
+  }
+  .heroHeading {
+    font-size: clamp(24px, 5.5vw, 32px);
+    letter-spacing: -0.4px;
   }
   .searchCardWrapper {
-    margin-top: -30px;
+    width: 100%;
+    max-width: calc(100% - clamp(24px, 6vw, 40px));
+    margin-top: -36px;
+    gap: 14px;
+  }
+  .searchCard {
+    border-radius: 22px;
+    padding: 18px 16px;
+    gap: 14px;
+    box-shadow: 0 12px 36px rgba(10, 25, 40, 0.16);
   }
   .searchTopRow {
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 12px;
   }
   .cityPicker {
     width: 100%;
   }
   .cityPickerBtn {
     width: 100%;
+    min-height: 48px;
+    font-size: 14.5px;
+    font-weight: 700;
+    border-radius: 12px;
     justify-content: space-between;
+    padding: 10px 16px;
   }
   .verticalDivider {
     display: none;
@@ -586,32 +607,62 @@
   .searchFieldWrap {
     width: 100%;
   }
+  .searchInput {
+    min-height: 48px;
+    font-size: 15.5px;
+    border-radius: 12px;
+    padding: 10px 14px;
+  }
   .searchSubmitBtn {
     width: 100%;
+    min-height: 48px;
+    border-radius: 999px;
+    font-size: 15.5px;
+    font-weight: 800;
   }
   .filterPillsRow {
     width: 100%;
     justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .filterPill {
+    font-size: 13.5px;
+    padding: 8px 14px;
+    min-height: 38px;
+    border-radius: 999px;
+  }
+  .quickLocRow {
+    padding-left: clamp(12px, 3vw, 20px);
+    padding-right: clamp(12px, 3vw, 20px);
+    gap: 8px;
+  }
+  .quickLocChip {
+    font-size: 12.5px;
+    padding: 6px 14px;
   }
 }
 
 @media (max-width: 480px) {
   .heroHeading {
-    font-size: 22px;
+    font-size: clamp(22px, 6vw, 26px);
   }
   .searchCardWrapper {
-    width: calc(100% - 20px);
+    max-width: calc(100% - 24px);
+    margin-top: -30px;
   }
   .searchCard {
-    padding: 12px;
+    padding: 16px 14px;
+    border-radius: 20px;
   }
 }
 
 /* -- Extra small screen fixes ------------------------------------- */
 @media (max-width: 360px) {
-  .searchCardWrapper { width: calc(100% - 16px); }
-  .searchCard        { padding: 10px; }
-  .cityPickerBtn     { font-size: 12px; padding: 8px 10px; }
-  .searchSubmitBtn   { font-size: 13px; }
-  .heroHeading       { font-size: 18px; }
+  .searchCardWrapper { max-width: calc(100% - 16px); }
+  .searchCard        { padding: 14px 12px; }
+  .cityPickerBtn     { font-size: 13.5px; }
+  .searchSubmitBtn   { font-size: 14.5px; }
+  .heroHeading       { font-size: 20px; }
 }

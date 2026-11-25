@@ -137,9 +137,9 @@
 
 .sectionInner {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 0 clamp(20px, 4vw, 60px);
+  padding: 0 clamp(16px, 4.5vw, 60px);
 }
 
 .sectionTag {
@@ -1707,7 +1707,7 @@
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 0 clamp(20px, 4vw, 64px);
+  padding: 0 clamp(16px, 4.5vw, 64px);
   box-sizing: border-box;
 }
 
@@ -1833,7 +1833,7 @@
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 0 clamp(20px, 4vw, 64px);
+  padding: 0 clamp(16px, 4.5vw, 64px);
   box-sizing: border-box;
 }
 

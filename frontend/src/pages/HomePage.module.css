@@ -1160,39 +1160,77 @@
 }
 .emptyBtn:hover { opacity: 0.9; transform: translateY(-2px); }
 
-/* ─── Responsive ─────────────────────────────────────────── */
+/* ─── Responsive (Modern Mobile App Layout & Sizing) ──────── */
 @media (max-width: 1200px) {
-  .categoryCardBig { min-width: 255px; height: 340px; }
+  .categoryCardBig { min-width: 260px; height: 350px; }
+  .localityCardHorizontal { min-width: 290px; }
+  .builderCardHorizontal { min-width: 260px; }
+}
+
+@media (max-width: 1024px) {
+  .section { padding: 56px 0 32px; }
+  .sectionTitle { font-size: 26px; }
+  .valuePropsGrid { grid-template-columns: repeat(2, 1fr); gap: 18px; }
+  .commercialCard { flex-direction: column; align-items: flex-start; padding: 36px 32px; gap: 32px; border-radius: 24px; }
+  .commercialMetrics { width: 100%; flex-direction: row; gap: 16px; }
+  .metricItem { flex: 1; }
+  .categoryCardBig { min-width: 250px; height: 335px; }
   .localityCardHorizontal { min-width: 280px; }
   .builderCardHorizontal { min-width: 250px; }
 }
 
-@media (max-width: 1024px) {
-  .valuePropsGrid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
-  .commercialCard { flex-direction: column; align-items: flex-start; padding: 36px; gap: 32px; }
-  .commercialMetrics { width: 100%; flex-direction: row; }
-  .metricItem { flex: 1; }
-  .categoryCardBig { min-width: 240px; height: 325px; }
-  .localityCardHorizontal { min-width: 260px; }
-  .builderCardHorizontal { min-width: 240px; }
-}
-
 @media (max-width: 768px) {
-  .section { padding: 48px 0 28px; }
-  .sectionTitle { font-size: 22px; }
-  .valuePropsGrid { grid-template-columns: 1fr; gap: 14px; }
-  .categoryCardBig { min-width: 230px; height: 310px; }
-  .localityCardHorizontal { min-width: 250px; }
-  .builderCardHorizontal { min-width: 230px; }
-  .commercialCard { padding: 28px 24px; }
-  .commercialMetrics { flex-direction: column; }
+  .section { padding: 40px 0 24px; }
+  .sectionHeader { margin-bottom: 24px; }
+  .sectionHeaderRow { margin-bottom: 20px; }
+  .sectionTitle { font-size: clamp(22px, 5.5vw, 28px); letter-spacing: -0.4px; }
+  .sectionSub { font-size: 15px; margin-top: 5px; }
+  .eyebrow { font-size: 12px; padding: 5px 13px; margin-bottom: 8px; }
+  .browseAllBtn { padding: 9px 20px; font-size: 13.5px; }
+
+  /* App-style edge-to-edge smooth horizontal swipe carousels */
+  .horizontalTrack {
+    gap: 16px;
+    padding: 10px clamp(16px, 4.5vw, 24px) 24px;
+    scroll-padding: clamp(16px, 4.5vw, 24px);
+    margin: 0 calc(-1 * clamp(16px, 4.5vw, 24px));
+    width: calc(100% + (2 * clamp(16px, 4.5vw, 24px)));
+  }
+
+  .horizontalCardItem {
+    width: min(84vw, 340px);
+    min-width: min(84vw, 340px);
+    scroll-snap-align: center;
+  }
+
+  .valuePropsGrid { grid-template-columns: 1fr; gap: 16px; }
+  .valueCard { padding: 22px 20px; border-radius: 22px; }
+  .valueTitle { font-size: 18px; }
+  .valueTitleSub { font-size: 14.5px; }
+  .valueDesc { font-size: 14px; line-height: 1.55; }
+  .valueIconBox { width: 54px; height: 54px; border-radius: 16px; }
+
+  .categoryCardBig { min-width: 240px; height: 320px; border-radius: 22px; }
+  .localityCardHorizontal { min-width: 265px; border-radius: 20px; padding: 18px; }
+  .builderCardHorizontal { min-width: 245px; border-radius: 20px; padding: 18px; }
+
+  .commercialCard { padding: 28px 20px; border-radius: 22px; }
+  .commercialMetrics { flex-direction: column; gap: 14px; }
+  .commercialTitle { font-size: 24px; }
+  .commercialDesc { font-size: 14.5px; }
 }
 
 @media (max-width: 540px) {
-  .categoryCardBig { min-width: 215px; height: 295px; }
-  .localityCardHorizontal { min-width: 235px; }
-  .builderCardHorizontal { min-width: 215px; }
-  .commercialCard { padding: 24px; }
+  .section { padding: 34px 0 20px; }
+  .sectionTitle { font-size: 23px; }
+  .horizontalCardItem {
+    width: 86vw;
+    min-width: 285px;
+  }
+  .categoryCardBig { min-width: 225px; height: 305px; }
+  .localityCardHorizontal { min-width: 250px; }
+  .builderCardHorizontal { min-width: 230px; }
+  .commercialCard { padding: 24px 18px; border-radius: 20px; }
 }
 
 

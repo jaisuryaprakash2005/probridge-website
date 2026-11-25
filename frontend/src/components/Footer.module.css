@@ -165,10 +165,11 @@
   .inner {
     grid-template-columns: 1fr;
     gap: 36px;
-    padding: 40px 20px 28px;
+    padding: 40px clamp(16px, 4.5vw, 24px) 28px;
   }
   .bottomInner {
     flex-direction: column;
     align-items: flex-start;
+    padding: 20px clamp(16px, 4.5vw, 24px);
   }
 }
