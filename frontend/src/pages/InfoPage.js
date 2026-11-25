@@ -447,8 +447,8 @@ function CareersView() {
       .then((res) => {
         const results = res.data?.results || [];
         if (active) {
-          // Connected with database: show ONLY database value
-          setCareersList(results);
+          // Connected with database: show ONLY database value (or default roles if none added yet)
+          setCareersList(results.length > 0 ? results : DEFAULT_ROLES);
         }
       })
       .catch((err) => {
@@ -990,16 +990,40 @@ function PropGuideView() {
 
   const getSafePdfUrl = (guide, forDownload = false) => {
     if (!guide) return '#';
-    if (forDownload && guide.downloadUrl) return guide.downloadUrl;
-    if (guide.fileUrl) return forDownload ? `${guide.fileUrl}?download=true` : guide.fileUrl;
-    const raw = guide.pdfUrl || '';
-    if (guide._id || guide.id) {
-      const guideId = guide._id || guide.id;
-      if (raw.includes('res.cloudinary.com') && raw.includes('/raw/upload/') && !raw.includes('/api/cloudinary.com')) {
-        const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
-        return `${apiBase}/bridge-guides/file/${guideId}${forDownload ? '?download=true' : ''}`;
+    const publicSamplePdf = `${process.env.PUBLIC_URL || ''}/probridge-guide.pdf`;
+
+    // 1. If explicit downloadUrl is set and reachable
+    if (forDownload && guide.downloadUrl) {
+      if (!guide.downloadUrl.includes('localhost') || window.location.hostname === 'localhost') {
+        return guide.downloadUrl;
       }
     }
+
+    // 2. If fileUrl is set and reachable
+    if (guide.fileUrl) {
+      if (!guide.fileUrl.includes('localhost') || window.location.hostname === 'localhost') {
+        return forDownload ? `${guide.fileUrl}?download=true` : guide.fileUrl;
+      }
+    }
+
+    const raw = guide.pdfUrl || '';
+
+    // 3. If it's a Cloudinary raw upload, check if backend proxy is reachable
+    if (raw.includes('res.cloudinary.com') && raw.includes('/raw/upload/') && !raw.includes('/api/cloudinary.com')) {
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const apiBase = process.env.REACT_APP_API_URL || (isLocal ? 'http://localhost:5001/api' : '');
+      const guideId = guide._id || guide.id;
+      if (apiBase && guideId) {
+        return `${apiBase}/bridge-guides/file/${guideId}${forDownload ? '?download=true' : ''}`;
+      }
+      return publicSamplePdf;
+    }
+
+    // 4. If raw is empty or blocked w3.org dummy URL, use bundled local PDF
+    if (!raw || raw === '#' || raw.includes('w3.org')) {
+      return publicSamplePdf;
+    }
+
     return raw;
   };
 

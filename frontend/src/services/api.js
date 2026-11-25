@@ -1,11 +1,15 @@
 import axios from 'axios';
 import { MOCK_PROPERTIES } from '../data/mockProperties';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+const isBrowser = typeof window !== 'undefined';
+const isLocalhost = isBrowser && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+// When deployed to live production (e.g. GitHub Pages) without an explicit REACT_APP_API_URL, do not target localhost
+const API_URL = process.env.REACT_APP_API_URL || (isLocalhost ? 'http://localhost:5001/api' : '');
 
 const api = axios.create({
-  baseURL: API_URL,
-  timeout: 10000,
+  baseURL: API_URL || 'http://localhost:5001/api',
+  timeout: isLocalhost ? 6000 : 3000,
 });
 
 // Attach JWT token to every request if available
@@ -15,24 +19,141 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// ─── Auth ───────────────────────────────────────────────────────────────────
-export const login         = (data) => api.post('/auth/login', data);
-export const register      = (data) => api.post('/auth/register', data);
-export const getMe         = ()     => api.get('/auth/me');
-export const updateProfile = (data) => api.patch('/auth/profile', data);
-export const sendPhoneOtp  = (data) => api.post('/auth/send-otp', data);
-export const phoneLogin    = (data) => api.post('/auth/phone-login', data);
+// ─── Auth (show database values when connected, fallback to demo session when disconnected) ────────
+export const login = async (data) => {
+  if (API_URL) {
+    try {
+      const res = await api.post('/auth/login', data);
+      if (res.data?.success || res.data?.token) return res;
+    } catch (err) {
+      if (err.response?.data?.message) throw err;
+    }
+  }
+  // Offline fallback login for live GitHub Pages preview
+  const mockUser = {
+    _id: 'user_live_1',
+    id: 'user_live_1',
+    name: data.email ? data.email.split('@')[0] : 'Demo User',
+    email: data.email || 'demo@probridge.com',
+    role: 'user',
+    phone: '9876543210',
+  };
+  return {
+    data: {
+      success: true,
+      token: 'pb_demo_offline_token',
+      user: mockUser,
+      message: 'Logged in successfully (Demo Session)',
+    }
+  };
+};
+
+export const register = async (data) => {
+  if (API_URL) {
+    try {
+      const res = await api.post('/auth/register', data);
+      if (res.data?.success || res.data?.token) return res;
+    } catch (err) {
+      if (err.response?.data?.message) throw err;
+    }
+  }
+  const mockUser = {
+    _id: 'user_new_1',
+    id: 'user_new_1',
+    name: data.name || 'ProBridge User',
+    email: data.email || 'user@probridge.com',
+    phone: data.phone || '',
+    role: 'user',
+  };
+  return {
+    data: {
+      success: true,
+      token: 'pb_demo_offline_token',
+      user: mockUser,
+      message: 'Registered successfully (Demo Session)',
+    }
+  };
+};
+
+export const getMe = async () => {
+  if (API_URL) {
+    try {
+      return await api.get('/auth/me');
+    } catch (_) {}
+  }
+  const stored = localStorage.getItem('pb_user');
+  if (stored) {
+    try {
+      return { data: { success: true, user: JSON.parse(stored) } };
+    } catch (_) {}
+  }
+  return { data: { success: false, user: null } };
+};
+
+export const updateProfile = async (data) => {
+  if (API_URL) {
+    try {
+      return await api.patch('/auth/profile', data);
+    } catch (_) {}
+  }
+  const stored = localStorage.getItem('pb_user');
+  const user = stored ? { ...JSON.parse(stored), ...data } : data;
+  localStorage.setItem('pb_user', JSON.stringify(user));
+  return { data: { success: true, user } };
+};
+
+export const sendPhoneOtp = async (data) => {
+  if (API_URL) {
+    try {
+      return await api.post('/auth/send-otp', data);
+    } catch (_) {}
+  }
+  return {
+    data: {
+      success: true,
+      message: 'OTP sent successfully! Demo code: 123456',
+    }
+  };
+};
+
+export const phoneLogin = async (data) => {
+  if (API_URL) {
+    try {
+      const res = await api.post('/auth/phone-login', data);
+      if (res.data?.success || res.data?.token) return res;
+    } catch (err) {
+      if (err.response?.data?.message) throw err;
+    }
+  }
+  const mockUser = {
+    _id: 'user_phone_1',
+    id: 'user_phone_1',
+    name: data.name || 'ProBridge Member',
+    phone: data.phone || '9876543210',
+    role: 'user',
+  };
+  return {
+    data: {
+      success: true,
+      token: 'pb_demo_offline_token',
+      user: mockUser,
+      message: 'Phone verified successfully (Demo Session)',
+    }
+  };
+};
 
 // ─── Properties (show database values when connected, fallback to dummy when disconnected) ─────────
 export const getProperties = async (params = {}) => {
-  try {
-    const res = await api.get('/properties', { params });
-    if (res.data?.success) {
-      // Database connected: return ONLY database value
-      return res;
+  if (API_URL) {
+    try {
+      const res = await api.get('/properties', { params });
+      if (res.data?.success) {
+        // Database connected: return ONLY database value
+        return res;
+      }
+    } catch (err) {
+      console.warn('[API fallback] Backend/Database disconnected, using dummy mock properties');
     }
-  } catch (err) {
-    console.warn('[API fallback] Backend/Database disconnected, using dummy mock properties');
   }
 
   // Database NOT connected: fallback to dummy properties
@@ -62,15 +183,17 @@ export const getProperties = async (params = {}) => {
 };
 
 export const getProperty = async (id) => {
-  try {
-    const res = await api.get(`/properties/${id}`);
-    const liveProp = res.data?.property || res.data?.result;
-    if (res.data?.success && liveProp) {
-      // Database connected: return ONLY the real database property as-is
-      return { data: { success: true, property: liveProp, result: liveProp } };
+  if (API_URL) {
+    try {
+      const res = await api.get(`/properties/${id}`);
+      const liveProp = res.data?.property || res.data?.result;
+      if (res.data?.success && liveProp) {
+        // Database connected: return ONLY the real database property as-is
+        return { data: { success: true, property: liveProp, result: liveProp } };
+      }
+    } catch (err) {
+      console.warn(`[API fallback] Backend/Database disconnected for property ${id}, using dummy data`);
     }
-  } catch (err) {
-    console.warn(`[API fallback] Backend/Database disconnected for property ${id}, using dummy data`);
   }
 
   // Database NOT connected: fallback to matching dummy property
@@ -86,10 +209,12 @@ export const deleteProperty      = (id)     => api.delete(`/properties/${id}`);
 export const getMyListings       = ()       => api.get('/properties/my/listings');
 
 export const getCityCounts = async () => {
-  try {
-    const res = await api.get('/properties/city-counts');
-    if (res.data?.counts) return res;
-  } catch (_) {}
+  if (API_URL) {
+    try {
+      const res = await api.get('/properties/city-counts');
+      if (res.data?.counts) return res;
+    } catch (_) {}
+  }
   return {
     data: {
       success: true,
@@ -99,10 +224,12 @@ export const getCityCounts = async () => {
 };
 
 export const getCategoryCounts = async () => {
-  try {
-    const res = await api.get('/properties/category-counts');
-    if (res.data?.counts) return res;
-  } catch (_) {}
+  if (API_URL) {
+    try {
+      const res = await api.get('/properties/category-counts');
+      if (res.data?.counts) return res;
+    } catch (_) {}
+  }
   return {
     data: {
       success: true,
@@ -112,10 +239,12 @@ export const getCategoryCounts = async () => {
 };
 
 export const getBuilderCounts = async () => {
-  try {
-    const res = await api.get('/properties/builder-counts');
-    if (res.data?.counts) return res;
-  } catch (_) {}
+  if (API_URL) {
+    try {
+      const res = await api.get('/properties/builder-counts');
+      if (res.data?.counts) return res;
+    } catch (_) {}
+  }
 
   // Compute dynamically from MOCK_PROPERTIES
   const counts = {};
@@ -134,10 +263,12 @@ export const getBuilderCounts = async () => {
 };
 
 export const getLocalityCounts = async () => {
-  try {
-    const res = await api.get('/properties/locality-counts');
-    if (res.data?.localities) return res;
-  } catch (_) {}
+  if (API_URL) {
+    try {
+      const res = await api.get('/properties/locality-counts');
+      if (res.data?.localities) return res;
+    } catch (_) {}
+  }
 
   // Compute dynamically from existing MOCK_PROPERTIES
   const locMap = {};
@@ -191,14 +322,16 @@ export const getLocalityCounts = async () => {
 
 // ─── Search ─────────────────────────────────────────────────────────────────
 export const searchProperties = async (params) => {
-  try {
-    const res = await api.get('/search', { params });
-    if (res.data?.success) {
-      // Database connected: return ONLY database search results
-      return res;
+  if (API_URL) {
+    try {
+      const res = await api.get('/search', { params });
+      if (res.data?.success) {
+        // Database connected: return ONLY database search results
+        return res;
+      }
+    } catch (_) {
+      console.warn('[API fallback] Backend/Database disconnected for search, using dummy properties');
     }
-  } catch (_) {
-    console.warn('[API fallback] Backend/Database disconnected for search, using dummy properties');
   }
   // Database NOT connected: fallback to dummy properties
   return {
@@ -220,53 +353,69 @@ export const getFilters = () => api.get('/filters');
 
 // ─── Saved ──────────────────────────────────────────────────────────────────
 export const getSaved = async () => {
-  try {
-    const res = await api.get('/saved');
-    if (res.data) return res;
-  } catch (_) {}
+  if (API_URL) {
+    try {
+      const res = await api.get('/saved');
+      if (res.data) return res;
+    } catch (_) {}
+  }
   return { data: { success: true, savedIds: [], properties: [] } };
 };
 
-export const toggleSaved = (propertyId) => api.post('/saved/toggle', { propertyId });
+export const toggleSaved = (propertyId) => (API_URL ? api.post('/saved/toggle', { propertyId }) : Promise.resolve({ data: { success: true } }));
 
 // ─── Enquiries ──────────────────────────────────────────────────────────────
 export const sendEnquiry = async (data) => {
-  try {
-    return await api.post('/enquiries', data);
-  } catch (_) {
-    // When offline, simulate successful lead capture
-    return { data: { success: true, message: 'Thank you! Your enquiry has been recorded.' } };
+  if (API_URL) {
+    try {
+      return await api.post('/enquiries', data);
+    } catch (_) {}
   }
+  // When offline/preview, simulate successful lead capture
+  return { data: { success: true, message: 'Thank you! Your enquiry has been recorded.' } };
 };
 
-export const getMyEnquiries = () => api.get('/enquiries/my');
+export const getMyEnquiries = async () => {
+  if (API_URL) {
+    try {
+      return await api.get('/enquiries/my');
+    } catch (_) {}
+  }
+  return { data: { success: true, enquiries: [] } };
+};
 
 export const getContactStatus = async (params = {}) => {
-  try {
-    const res = await api.get('/enquiries/contact-status', { params });
-    return res;
-  } catch (_) {
-    return { data: { success: true, submitted: false } };
+  if (API_URL) {
+    try {
+      const res = await api.get('/enquiries/contact-status', { params });
+      return res;
+    } catch (_) {}
   }
+  const submitted = Boolean(localStorage.getItem('pb_contact_submitted_global'));
+  return { data: { success: true, submitted } };
 };
 
 // ─── Ads / Sponsored Banners ────────────────────────────────────────────────
 export const getActiveAds = async () => {
-  try {
-    const res = await api.get('/ads/active');
-    if (res.data?.ads && res.data.ads.length > 0) return res;
-  } catch (_) {}
+  if (API_URL) {
+    try {
+      const res = await api.get('/ads/active');
+      if (res.data?.ads && res.data.ads.length > 0) return res;
+    } catch (_) {}
+  }
   return { data: { success: true, ads: [] } };
 };
 
-export const trackAdClick = (id) => api.post(`/ads/${id}/click`);
+export const trackAdClick = (id) => (API_URL ? api.post(`/ads/${id}/click`) : Promise.resolve());
 
 // ─── Top Banners ────────────────────────────────────────────────────────────
 export const getTopBanners = async () => {
-  try {
-    const res = await api.get('/top-banners');
-    if (res.data?.banners && res.data.banners.length > 0) return res;
-  } catch (_) {}
+  if (API_URL) {
+    try {
+      const res = await api.get('/top-banners');
+      if (res.data?.banners && res.data.banners.length > 0) return res;
+    } catch (_) {}
+  }
   return {
     data: {
       success: true,
@@ -286,14 +435,16 @@ export const getTopBanners = async () => {
 };
 
 export const getBuilders = async () => {
-  try {
-    const res = await api.get('/builders');
-    if (res.data) return res;
-  } catch (_) {}
+  if (API_URL) {
+    try {
+      const res = await api.get('/builders');
+      if (res.data) return res;
+    } catch (_) {}
+  }
   return { data: { success: true, results: [] } };
 };
 
-export const trackTopBannerClick = (id) => api.post(`/top-banners/${id}/click`);
+export const trackTopBannerClick = (id) => (API_URL ? api.post(`/top-banners/${id}/click`) : Promise.resolve());
 
 // ─── Upload ─────────────────────────────────────────────────────────────────
 export const uploadImage = (file) => {
@@ -303,15 +454,42 @@ export const uploadImage = (file) => {
 };
 
 // ─── Careers ────────────────────────────────────────────────────────────────
-export const getCareers = () => api.get('/careers');
-export const getCareerById = (id) => api.get('/careers/' + id);
-export const applyForCareer = (data) => {
-  if (typeof FormData !== 'undefined' && data instanceof FormData) {
-    return api.post('/careers/apply', data, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+export const getCareers = async () => {
+  if (API_URL) {
+    try {
+      const res = await api.get('/careers');
+      if (res.data) return res;
+    } catch (_) {}
   }
-  return api.post('/careers/apply', data);
+  return { data: { success: true, results: [] } };
+};
+
+export const getCareerById = async (id) => {
+  if (API_URL) {
+    try {
+      return await api.get('/careers/' + id);
+    } catch (_) {}
+  }
+  return { data: { success: true, result: null } };
+};
+
+export const applyForCareer = async (data) => {
+  if (API_URL) {
+    try {
+      if (typeof FormData !== 'undefined' && data instanceof FormData) {
+        return await api.post('/careers/apply', data, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      }
+      return await api.post('/careers/apply', data);
+    } catch (_) {}
+  }
+  return {
+    data: {
+      success: true,
+      message: 'Thank you for applying! Your application has been recorded.'
+    }
+  };
 };
 
 // ─── YouTube Links (Spotlight Coverflow) ─────────────────────────────────────
@@ -359,12 +537,14 @@ const INITIAL_YOUTUBE_LINKS = [
 ];
 
 export const getYoutubeLinks = async () => {
-  try {
-    const res = await api.get('/youtube-links');
-    if (res.data?.success && Array.isArray(res.data?.links || res.data?.results)) {
-      return { data: { success: true, links: res.data.links || res.data.results } };
-    }
-  } catch (_) {}
+  if (API_URL) {
+    try {
+      const res = await api.get('/youtube-links');
+      if (res.data?.success && Array.isArray(res.data?.links || res.data?.results)) {
+        return { data: { success: true, links: res.data.links || res.data.results } };
+      }
+    } catch (_) {}
+  }
   return { data: { success: true, links: INITIAL_YOUTUBE_LINKS, isDummyFallback: true } };
 };
 
@@ -427,20 +607,24 @@ const INITIAL_BLOGS = [
 ];
 
 export const getBlogs = async () => {
-  try {
-    const res = await api.get('/blogs');
-    if (res.data?.success && Array.isArray(res.data?.blogs || res.data?.results)) {
-      return { data: { success: true, blogs: res.data.blogs || res.data.results } };
-    }
-  } catch (_) {}
+  if (API_URL) {
+    try {
+      const res = await api.get('/blogs');
+      if (res.data?.success && Array.isArray(res.data?.blogs || res.data?.results)) {
+        return { data: { success: true, blogs: res.data.blogs || res.data.results } };
+      }
+    } catch (_) {}
+  }
   return { data: { success: true, blogs: INITIAL_BLOGS, isDummyFallback: true } };
 };
 
 export const getBlogById = async (id) => {
-  try {
-    const res = await api.get(`/blogs/${id}`);
-    if (res.data?.success && res.data?.blog) return res;
-  } catch (_) {}
+  if (API_URL) {
+    try {
+      const res = await api.get(`/blogs/${id}`);
+      if (res.data?.success && res.data?.blog) return res;
+    } catch (_) {}
+  }
   const found = INITIAL_BLOGS.find(b => b._id === id || b.slug === id);
   return { data: { success: true, blog: found || INITIAL_BLOGS[0], isDummyFallback: true } };
 };
@@ -451,7 +635,7 @@ export const INITIAL_BRIDGE_GUIDES = [
     _id: 'guide_1',
     id: 'guide_1',
     title: 'The Ultimate RERA & Legal Verification Handbook for Homebuyers',
-    pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    pdfUrl: `${process.env.PUBLIC_URL || ''}/probridge-guide.pdf`,
     fileName: 'ProBridge_RERA_Legal_Handbook_2026.pdf',
     fileSize: '2.4 MB',
     description: 'Comprehensive guide covering RERA compliance checks, encumbrance certificate verification, mother deed validation, and checklist for new property registration.',
@@ -463,7 +647,7 @@ export const INITIAL_BRIDGE_GUIDES = [
     _id: 'guide_2',
     id: 'guide_2',
     title: 'First-Time Homebuyer Complete Financial Planning & Tax Guide',
-    pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    pdfUrl: `${process.env.PUBLIC_URL || ''}/probridge-guide.pdf`,
     fileName: 'Homebuyer_Finance_Tax_Guide.pdf',
     fileSize: '1.8 MB',
     description: 'Everything you need to know about down payments, CIBIL score optimization, Section 24(b) & 80C tax deductions, and choosing between fixed vs floating interest rates.',
@@ -475,7 +659,7 @@ export const INITIAL_BRIDGE_GUIDES = [
     _id: 'guide_3',
     id: 'guide_3',
     title: 'NRI Real Estate Investment Guide in India: FEMA & Repatriation Rules',
-    pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    pdfUrl: `${process.env.PUBLIC_URL || ''}/probridge-guide.pdf`,
     fileName: 'NRI_Property_Investment_FEMA_Guide.pdf',
     fileSize: '3.1 MB',
     description: 'A complete advisory guide for non-resident Indians on NRE/NRO accounts, Power of Attorney protocols, TDS under Section 195, and funds repatriation guidelines.',
@@ -486,13 +670,15 @@ export const INITIAL_BRIDGE_GUIDES = [
 ];
 
 export const getBridgeGuides = async () => {
-  try {
-    const res = await api.get('/bridge-guides');
-    const list = res.data?.guides || res.data?.results || (Array.isArray(res.data) ? res.data : null);
-    if (res.data?.success && Array.isArray(list)) {
-      return { data: { success: true, guides: list } };
-    }
-  } catch (_) {}
+  if (API_URL) {
+    try {
+      const res = await api.get('/bridge-guides');
+      const list = res.data?.guides || res.data?.results || (Array.isArray(res.data) ? res.data : null);
+      if (res.data?.success && Array.isArray(list)) {
+        return { data: { success: true, guides: list } };
+      }
+    } catch (_) {}
+  }
 
   // Check localStorage if admin dashboard placed guides in localStore
   try {
